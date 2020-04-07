@@ -1,0 +1,287 @@
+#+TITLE: My Doom Emacs config
+#+AUTHOR: Alex Day
+#+EMAIL: alex@alexday.me
+#+LANGUAGE: en
+#+STARTUP: noinlineimages
+#+PROPERTY: header-args :tangle yes :cache yes :results silent :padline no
+* General
+** File Header
+Set the default to lexical binding. Most up to date languages use this style so
+it doesn't add much complexity. Read more about [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][lexical binding here]].
+#+BEGIN_SRC emacs-lisp
+;;; Config.el --- -*- lexical-binding: t -*-
+;;; Author: Alex Day
+#+END_SRC
+** Identification
+Set full name and mail address. Could also add GPG stuff
+#+BEGIN_SRC emacs-lisp
+(setq! user-full-name "Alex Day"
+       user-full-address "alex@alexday.me")
+#+END_SRC
+* Appearance
+** Fonts
+Set the default font to be JetBrain's Mono. Trying to set the unicode font
+in hopes of being able to display emoji (🦀)
+#+BEGIN_SRC emacs-lisp
+(setq! doom-font "JetBrainsMono Nerd Font Mono-13"
+       doom-unicode-font "JoyPixels-14")
+#+END_SRC
+*** TODO Display emoji
+** Theme
+Set the theme to match the rest of my desktop environment
+#+BEGIN_SRC emacs-lisp
+(load-theme 'doom-gruvbox)
+#+END_SRC
+** Resize Pixelwise (for i3)
+#+BEGIN_SRC emacs-lisp
+(setq frame-resize-pixelwise t)
+#+END_SRC
+** Hide trailing whitespace
+#+BEGIN_SRC emacs-lisp
+(setq show-trailing-whitespace t)
+#+END_SRC
+** Line Numbering
+Change the line numbering to relative. This helps when executing evil mode
+commands like ~11dd~ to delete the current and next ten lines
+#+BEGIN_SRC emacs-lisp
+(setq display-line-numbers-type 'relative)
+#+END_SRC
+* Plugins
+** Projectile
+Set the default projectile project path so it knows where to search
+#+BEGIN_SRC emacs-lisp
+(setq projectile-project-search-path '("~/code/"))
+#+END_SRC
+*** TODO Fix projectile file search
+I thought it had something to do with my default shell being fish but
+it still doesn't work with the default shell changed
+#+BEGIN_SRC emacs-lisp
+(setq shell-file-nae "/bin/sh")
+#+END_SRC
+** Jedi
+Make Jedi autocomplete on "dot"-esque symbols
+#+BEGIN_SRC emacs-lisp
+(setq jedi:complete-on-dot t)
+#+END_SRC
+** Images
+Open images in eimp mode
+#+BEGIN_SRC emacs-lisp
+(add-hook! 'image-mode-hook 'eimp-mode)
+#+END_SRC
+** Org
+Set the default org directory
+#+BEGIN_SRC emacs-lisp
+(setq org-directory "~/doc/org/")
+(setq org-agenda-files '("~/doc/org/"))
+#+END_SRC
+Set the default ellipsis char
+#+BEGIN_SRC emacs-lisp
+(setq org-ellipsis " ▼ ")
+#+END_SRC
+Strike through done tasks
+#+BEGIN_SRC emacs-lisp
+(setq org-fontify-done-headline t)
+(custom-set-faces
+ '(org-done ((t (
+                 :weight bold
+                 :strike-through nil))))
+ '(org-headline-done
+   ((((class color) (min-colors 16) (background dark))
+     (:strike-through t)))))
+#+END_SRC
+Modify default capture templates
+#+begin_src emacs-lisp
+(setq org-capture-templates
+      '(("s" "School Todo" entry (file+headline "~/doc/org/todo.org" "Inbox")
+         "* TODO %?\n  %a (for school)\n")
+        ("p" "Personal Todo" entry (file+headline "~/doc/org/todo.org" "Inbox")
+         "* TODO %?\n  %a (for personal)\n")
+        ("n" "Note" entry (file+headline "~/doc/org/notes.org" "Notes")
+         "* NOTE %?\n  %i\n  %a")
+        ("j" "Journal" entry (file+datetree "~/doc/org/journal.org")
+         "* %?\nEntered on %U\n  %i\n  %a")))
+#+end_src
+Set agenda defaults
+#+BEGIN_SRC emacs-lisp
+(setq org-agenda-start-on-weekday nil)
+(setq org-agenda-start-day "0d")
+(setq org-agenda-span 'day)
+#+END_SRC
+Make bullets look nice-er
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+** mu4e
+*** After! Mu4e
+#+BEGIN_SRC emacs-lisp
+(after! mu4e
+#+END_SRC
+*** General
+#+BEGIN_SRC emacs-lisp
+  (setq! mu4e-get-mail-command "mbsync -a && mu index --maildir=~/.local/share/mail/"
+         mu4e-index-update-in-background t
+         mu4e-use-fancy-chars t
+         mu4e-compose-signature-auto-include t
+         mu4e-use-fancy-chars t
+         mu4e-view-show-addresses t
+         mu4e-view-show-images t
+         mu4e-compose-format-flowed t
+         mu4e-maildir "~/.local/share/mail"
+         ;mu4e-compose-in-new-frame t
+         mu4e-change-filenames-when-moving t ;; http://pragmaticemacs.com/emacs/fixing-duplicate-uid-errors-when-using-mbsync-and-mu4e/
+)
+#+END_SRC
+*** Actions
+**** Open in Browser
+#+BEGIN_SRC emacs-lisp
+  ;; Add an open in browser action
+  (add-to-list 'mu4e-headers-actions
+             '("in browser" . mu4e-action-view-in-browser) t)
+  (add-to-list 'mu4e-view-actions
+             '("in browser" . mu4e-action-view-in-browser) t)
+#+END_SRC
+*** Email Contexts
+#+BEGIN_SRC emacs-lisp
+  (setq! mu4e-compose-context-policy 'ask-if-none
+         mu4e-context-policy 'pick-first
+         mu4e-contexts
+            `( ,(make-mu4e-context
+                    :name "gmail"
+                    :match-func (lambda (msg)
+                                    (when msg
+                                        (mu4e-message-contact-field-matches msg
+                                        :to "alexday135@gmail.com")))
+                    :enter-func '()
+                    :leave-func (lambda () (mu4e-clear-caches))
+                    :vars '(
+                            (user-mail-address      . "alexday135@gmail")
+                            (user-full-name         . "Alex Day")
+                            (mu4e-drafts-folder     . "/gmail/Drafts")
+                            (mu4e-refile-folder     . "/gmail/Archive")
+                            (mu4e-sent-folder       . "/gmail/Sent Mail")
+                            (mu4e-trash-folder      . "/gmail/Trash")
+                            (mu4e-update-interval   . 1800)))
+                ,(make-mu4e-context
+                    :name "alexday"
+                    :match-func (lambda (msg)
+                                    (when msg
+                                        (mu4e-message-contact-field-matches msg
+                                            :to "alex@alexday.me")))
+                    :enter-func '()
+                    :leave-func (lambda () (mu4e-clear-caches))
+                    :vars '((user-mail-address      . "alex@alexday.me")
+                            (user-full-name         . "Alex Day")
+                            (mu4e-drafts-folder     . "/alexdayme/Drafts")
+                            (mu4e-refile-folder     . "/alexdayme/Archive")
+                            (mu4e-sent-folder       . "/alexdayme/Sent")
+                            (mu4e-trash-folder      . "/alexdayme/Trash")
+                            (mu4e-update-interval   . 1800)))))
+#+END_SRC
+*** Use MSMTP
+#+BEGIN_SRC emacs-lisp
+(setq! sendmail-program "/usr/bin/msmtp"
+       message-sendmail-f-is-evil t
+       message-sendmail-extra-arguments '("--read-envelope-from")
+       message-send-mail-function 'message-send-mail-with-sendmail)
+#+END_SRC
+*** Message formatting and sending
+#+BEGIN_SRC emacs-lisp
+  (setq! message-citation-line-format "On %a %d %b %Y at %R, %f wrote:\n"
+         message-citation-line-function 'message-insert-formatted-citation-line
+         message-kill-buffer-on-exit t)
+#+END_SRC
+*** End After! block
+#+BEGIN_SRC emacs-lisp
+)
+#+END_SRC
+* Languages
+** LaTeX
+Default to opening latex files inside of latex. When opening these files keep
+focus on the tex buffer
+#+BEGIN_SRC emacs-lisp
+(setq! +latex-viewers '(pdf-tools)
+       TeX-view-evince-keep-focus 't)
+#+END_SRC
+Turn off word wrapping in latex mode
+#+BEGIN_SRC emacs-lisp
+(add-hook! 'latex-mode-hook
+           (setq line-mode-visual nil))
+#+END_SRC
+** Python
+*** Autocomplete
+Set up company Jedi support in python
+#+BEGIN_SRC emacs-lisp
+(add-hook! 'python-mode-hook
+           (add-to-list 'company-backends 'company-jedi))
+#+END_SRC
+*** Google Docstring Snippet
+This function is used in a custom yasnippet file that generates a google style
+guide compliant function and docstring
+#+BEGIN_SRC emacs-lisp
+(defun python-args-to-google-docstring (text &optional make-fields)
+  "Return a reST docstring format for the python arguments in yas-text."
+  (let* ((indent (concat "\n" (make-string (current-column) 32)))
+         (args (python-split-args text))
+     (nr 0)
+         (formatted-args
+      (mapconcat
+       (lambda (x)
+         (concat "   " (nth 0 x)
+             (if make-fields (format " ${%d:arg%d}" (cl-incf nr) nr))
+             (if (nth 1 x) (concat " \(default " (nth 1 x) "\)"))))
+       args
+       indent)))
+    (unless (string= formatted-args "")
+      (concat
+       (mapconcat 'identity
+          (list "" "Args:" formatted-args)
+          indent)
+       "\n"))))
+#+END_SRC
+*** Nice Code Execution
+#+BEGIN_SRC emacs-lisp
+(defun run-python-script ()
+  (interactive)
+  (shell-command (format "python %s" (buffer-name)) "*python-output*"))
+(global-set-key [f5] 'run-python-script)
+#+END_SRC
+** C/C++
+Open .h files in C mode
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+#+END_SRC
+* Keymaps
+** Replace
+Add easy shortcuts for replacing normally and with regular expressions
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+  (:prefix ("r" . "replace")
+  :desc "String" "s" 'replace-string
+  :desc "Query" "q" 'query-replace
+  (:prefix ("r" . "Regexp")
+    :desc "String" "s" 'replace-regexp
+    :desc "Query" "q" 'query-replace-regexp
+    )
+  )
+)
+#+END_SRC
+** Insert
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      (:prefix ("i" . "insert")
+       :desc "Unicode" "u" 'insert-char
+       :desc "Snippet" "s" 'yas-insert-snippet
+       :desc "From Clipboard" "y" '+default/yank-pop
+       :desc "From Evil Registers" "r" 'counsel-evil-registers
+      )
+)
+#+END_SRC
+** Zoom Images
+#+BEGIN_SRC emacs-lisp
+(map! :localleader
+      :map eimp-minor-mode-map
+      (:prefix ("z" . "zoom")
+        :desc "In" "i" 'eimp-increase-image-size
+        :desc "Out" "o" 'eimp-decrease-image-size
+        :desc "Fit to Window" "f" 'eimp-fit-image-to-window))
+#+END_SRC
