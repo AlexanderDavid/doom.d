@@ -114,7 +114,7 @@
 (setq mu4e-sent-messages-behavior 'delete)
 
 ;; allow for updating mail using 'U' in the main view:
-(setq mu4e-get-mail-command "offlineimap && mu index --maildir=.local/share/mail/ --muhome=.cache/mu")
+(setq mu4e-get-mail-command "offlineimap")
 
 ;; Download attachments to the correct directory
 (setq mu4e-attachment-dir "~/dl")
