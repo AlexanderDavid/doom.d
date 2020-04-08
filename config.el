@@ -193,3 +193,9 @@
         :desc "In" "i" 'eimp-increase-image-size
         :desc "Out" "o" 'eimp-decrease-image-size
         :desc "Fit to Window" "f" 'eimp-fit-image-to-window))
+(map! :leader
+      (:prefix ("o")
+        :desc "Open todo.org" "t" (lambda () (interactive) (find-file "~/doc/org/todo.org"))))
+(map! :leader
+      (:prefix ("o")
+        :desc "Open mu4e" "m" 'mu4e))

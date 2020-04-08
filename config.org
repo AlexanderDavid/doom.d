@@ -308,3 +308,15 @@ Add easy shortcuts for replacing normally and with regular expressions
         :desc "Out" "o" 'eimp-decrease-image-size
         :desc "Fit to Window" "f" 'eimp-fit-image-to-window))
 #+END_SRC
+** Jump to todo file
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      (:prefix ("o")
+        :desc "Open todo.org" "t" (lambda () (interactive) (find-file "~/doc/org/todo.org"))))
+#+END_SRC
+** Open mu4e
+#+BEGIN_SRC emacs-lisp
+(map! :leader
+      (:prefix ("o")
+        :desc "Open mu4e" "m" 'mu4e))
+#+END_SRC
