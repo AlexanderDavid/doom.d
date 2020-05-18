@@ -4,7 +4,8 @@
        user-full-address "alex@alexday.me")
 (setq! doom-font "JetBrainsMono Nerd Font Mono-13"
        doom-unicode-font "JoyPixels-14")
-(load-theme 'doom-gruvbox)
+(setq custom-safe-themes t)
+(load-theme 'doom-gruvbox )
 (setq frame-resize-pixelwise t)
 (setq show-trailing-whitespace t)
 (setq display-line-numbers-type 'relative)
@@ -25,22 +26,13 @@
      (:strike-through t)))))
 (require 'org-mu4e)
 (setq org-capture-templates
-      '(("p" "Todo" entry (file+headline "~/doc/org/todo.org" "Inbox")
-         "* TODO %?\n  %a\n")
-        ;; ("e" "Email Todo" entry (file+headline "~/doc/org/todo.org" "Inbox")
-        ;;  "* TODO %?\nSCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+0d\"))\n%a\n")
-        ("e" "Email Todo" entry (file+headline "~/doc/org/todo.org" "Inbox")
-         "* TODO %?\nProcess mail from %:fromname on %:subject\nSCHEDULED:%t\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n:PROPERTIES:\n:CREATED: %U\n:END:\n %a" :prepend t)
-        ("n" "Note" entry (file+headline "~/doc/org/notes.org" "Notes")
-         "* NOTE %?\n  %i\n  %a")
-        ("j" "Journal" entry (file+datetree "~/doc/org/journal.org")
-         "* %?\nEntered on %U\n  %i\n  %a")))
-(setq org-agenda-start-on-weekday nil)
-(setq org-agenda-start-day "0d")
-(setq org-agenda-span 'day)
-(setq org-pretty-entities 't)
-(require 'mu4e)
+      '(("t" "Todo" entry (file+olp+datetree "~/doc/org/todo.org" "Inbox")
+         "* TODO %?\n  %i\n  %a")
+        ("e" "Email Todo" entry (file+olp+datetree "~/doc/org/todo.org" "Inbox")
+         "* TODO %?\nProcess mail from %:fromname on %:subject\nSCHEDULED:%t\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n:PROPERTIES:\n:CREATED: %U\n:END:\n %a" :prepend t)))
 
+(setq org-pretty-entities 't)
+(after! mu4e
 ;; use mu4e for e-mail in emacs
 (setq mail-user-agent 'mu4e-user-agent)
 (setq mu4e-maildir "/home/alex/.local/share/mail")
@@ -52,9 +44,8 @@
         :enter-func (lambda ()
                       (mu4e-message "Entering Clemson context")
                       (setq mu4e-maildir-shortcuts  '( ("/clemson/INBOX"               . ?i)
-                                                       ("/clemson/Sent"   . ?s)
-                                                       ("/clemson/Trash"       . ?t)
-                                                       ("/clemson/All Mail"    . ?a)
+                                                       ("/clemson/sent"   . ?s)
+                                                       ("/clemson/trash"       . ?t)
                                                        ("/clemson/archive"             . ?r)))
                     )
         :leave-func (lambda () (mu4e-message "Leaving Clemson context"))
@@ -66,39 +57,62 @@
                 :to "adday@g.clemson.edu"))))
         :vars '( ( user-mail-address     . "adday@clemson.edu"  )
                 ( user-full-name         . "Alex Day" )
-                ( mu4e-drafts-folder     . "/clemson/Drafts")
-                ( mu4e-sent-folder       . "/clemson/Sent")
-                ( mu4e-trash-folder      . "/clemson/Trash")
+                ( mu4e-drafts-folder     . "/clemson/drafts")
+                ( mu4e-sent-folder       . "/clemson/sent")
+                ( mu4e-trash-folder      . "/clemson/trash")
                 ( mu4e-refile-folder     . "/clemson/archive" )
                 ( mu4e-compose-signature .
                     (concat
                     "Alex Day"))))
        ,(make-mu4e-context
-        :name "Gmail"
+        :name "gmail"
         :enter-func (lambda ()
                       (mu4e-message "Entering Gmail context")
                       (setq mu4e-maildir-shortcuts  '( ("/gmail/INBOX"               . ?i)
-                                                       ("/gmail/[Gmail].Sent Mail"   . ?s)
-                                                       ("/gmail/[Gmail].Trash"       . ?t)
-                                                       ("/gmail/[Gmail].All Mail"    . ?a)
+                                                       ("/gmail/sent"   . ?s)
+                                                       ("/gmail/trash"       . ?t)
                                                        ("/gmail/archive"             . ?r)))
                     )
         :leave-func (lambda () (mu4e-message "Leaving Gmail context"))
         :match-func (lambda (msg)
                         (when msg
-                                (mu4e-message-contact-field-matches msg
-                                :to "alexday135@gmail.com")))
+                                (or (mu4e-message-contact-field-matches msg
+                                        :to "alexday135@gmail.com")
+                                    (mu4e-message-contact-field-matches msg
+                                        :to "A.D.Day@eagle.clarion.edu"))))
         :vars '( ( user-mail-address     . "alexday135@gmail.com"  )
                 ( user-full-name         . "Alex Day" )
-                ( mu4e-drafts-folder     . "/gmail/[Gmail].Drafts")
-                ( mu4e-sent-folder       . "/gmail/[Gmail].Sent Mail")
-                ( mu4e-trash-folder      . "/gmail/[Gmail].Trash")
+                ( mu4e-drafts-folder     . "/gmail/drafts")
+                ( mu4e-sent-folder       . "/gmail/sent")
+                ( mu4e-trash-folder      . "/gmail/trash")
                 ( mu4e-refile-folder     . "/gmail/archive" )
                 ( mu4e-compose-signature .
                     (concat
                     "Alex Day"))))))
 
 
+;; Add bookmarks
+(setq mu4e-bookmarks
+  `( ,(make-mu4e-bookmark
+       :name "Messages in inbox"
+       :query "maildir:\"/clemson/INBOX\" OR maildir:\"/gmail/INBOX\""
+       :key ?i)
+     ,(make-mu4e-bookmark
+       :name  "Unread messages"
+       :query "flag:unread AND NOT flag:trashed"
+       :key ?u)
+     ,(make-mu4e-bookmark
+       :name "Today's messages"
+       :query "date:today..now"
+       :key ?t)
+     ,(make-mu4e-bookmark
+       :name "Last 7 days"
+       :query "date:7d..now"
+       :key ?w)
+     ,(make-mu4e-bookmark
+       :name "Messages with images"
+       :query "mime:image/*"
+       :key ?p)))
 ;; set `mu4e-context-policy` and `mu4e-compose-policy` to tweak when mu4e should
 ;; guess or ask the correct context, e.g.
 
@@ -114,7 +128,7 @@
 (setq mu4e-sent-messages-behavior 'delete)
 
 ;; allow for updating mail using 'U' in the main view:
-(setq mu4e-get-mail-command "offlineimap")
+(setq mu4e-get-mail-command "mbsync -a")
 
 ;; Download attachments to the correct directory
 (setq mu4e-attachment-dir "~/dl")
@@ -138,7 +152,7 @@
 (setq message-kill-buffer-on-exit t)
 
 ;; Store link to message if in header view, not to header query
-(setq org-mu4e-link-query-in-headers-mode nil)
+(setq org-mu4e-link-query-in-headers-mode nil))
 (setq! +latex-viewers '(pdf-tools)
        TeX-view-evince-keep-focus 't)
 (add-hook! 'latex-mode-hook
