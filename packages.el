@@ -49,3 +49,11 @@
 ;; This is required for some packages whose default branch isn't 'master' (which
 ;; our package manager can't deal with; see raxod502/straight.el#279)
 ;(package! builtin-package :recipe (:branch "develop"))
+
+(package! python-docstring
+  :recipe (:host github :repo "AlexanderDavid/python-docstring"
+           :files ("python-docstring.el")))
+
+(package! hugo
+  :recipe (:host github :repo "aaronbieber/hugo.el"
+           :files ("hugo.el")))

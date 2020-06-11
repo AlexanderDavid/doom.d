@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: Testing PythonDocstring
+# key: test 
+# --
+
+$1 `(print yas-text)`

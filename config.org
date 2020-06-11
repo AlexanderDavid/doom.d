@@ -73,8 +73,8 @@ Open images in eimp mode
 ** Org
 Set the default org directory
 #+BEGIN_SRC emacs-lisp
-(setq org-directory "~/doc/org/")
-(setq org-agenda-files '("~/doc/org/"))
+(setq org-directory "~/Dropbox/")
+(setq org-agenda-files '("~/Dropbox/"))
 #+END_SRC
 Set the default ellipsis char
 #+BEGIN_SRC emacs-lisp
@@ -95,9 +95,9 @@ Modify default capture templates
 #+BEGIN_SRC emacs-lisp
 (require 'org-mu4e)
 (setq org-capture-templates
-      '(("t" "Todo" entry (file+olp+datetree "~/doc/org/todo.org" "Inbox")
+      '(("t" "Todo" entry (file+olp+datetree "~/Dropbox/todo.org" "Inbox")
          "* TODO %?\n  %i\n  %a")
-        ("e" "Email Todo" entry (file+olp+datetree "~/doc/org/todo.org" "Inbox")
+        ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo.org" "Inbox")
          "* TODO %?\nProcess mail from %:fromname on %:subject\nSCHEDULED:%t\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n:PROPERTIES:\n:CREATED: %U\n:END:\n %a" :prepend t)))
 #+END_SRC
 Set agenda defaults
@@ -248,28 +248,10 @@ Set up company Jedi support in python
            (add-to-list 'company-backends 'company-jedi))
 #+END_SRC
 *** Google Docstring Snippet
-This function is used in a custom yasnippet file that generates a google style
-guide compliant function and docstring
+Google docstrings
 #+BEGIN_SRC emacs-lisp
-(defun python-args-to-google-docstring (text &optional make-fields)
-  "Return a reST docstring format for the python arguments in yas-text."
-  (let* ((indent (concat "\n" (make-string (current-column) 32)))
-         (args (python-split-args text))
-     (nr 0)
-         (formatted-args
-      (mapconcat
-       (lambda (x)
-         (concat "   " (nth 0 x)
-             (if make-fields (format " ${%d:arg%d}" (cl-incf nr) nr))
-             (if (nth 1 x) (concat " \(default " (nth 1 x) "\)"))))
-       args
-       indent)))
-    (unless (string= formatted-args "")
-      (concat
-       (mapconcat 'identity
-          (list "" "Args:" formatted-args)
-          indent)
-       "\n"))))
+(require 'python-docstring)
+(add-hook 'python-mode-hook 'python-docstring-minor-mode)
 #+END_SRC
 *** Nice Code Execution
 #+BEGIN_SRC emacs-lisp
@@ -322,7 +304,7 @@ Add easy shortcuts for replacing normally and with regular expressions
 #+BEGIN_SRC emacs-lisp
 (map! :leader
       (:prefix ("o")
-        :desc "Open todo.org" "t" (lambda () (interactive) (find-file "~/doc/org/todo.org"))))
+        :desc "Open todo.org" "t" (lambda () (interactive) (find-file "~/Dropbox/todo.org"))))
 #+END_SRC
 ** Open mu4e
 #+BEGIN_SRC emacs-lisp

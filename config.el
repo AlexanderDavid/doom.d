@@ -13,8 +13,8 @@
 (setq shell-file-nae "/bin/sh")
 (setq jedi:complete-on-dot t)
 (add-hook! 'image-mode-hook 'eimp-mode)
-(setq org-directory "~/doc/org/")
-(setq org-agenda-files '("~/doc/org/"))
+(setq org-directory "~/Dropbox/")
+(setq org-agenda-files '("~/Dropbox/"))
 (setq org-ellipsis " ▼ ")
 (setq org-fontify-done-headline t)
 (custom-set-faces
@@ -26,9 +26,9 @@
      (:strike-through t)))))
 (require 'org-mu4e)
 (setq org-capture-templates
-      '(("t" "Todo" entry (file+olp+datetree "~/doc/org/todo.org" "Inbox")
+      '(("t" "Todo" entry (file+olp+datetree "~/Dropbox/todo.org" "Inbox")
          "* TODO %?\n  %i\n  %a")
-        ("e" "Email Todo" entry (file+olp+datetree "~/doc/org/todo.org" "Inbox")
+        ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo.org" "Inbox")
          "* TODO %?\nProcess mail from %:fromname on %:subject\nSCHEDULED:%t\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n:PROPERTIES:\n:CREATED: %U\n:END:\n %a" :prepend t)))
 
 (setq org-pretty-entities 't)
@@ -108,11 +108,7 @@
      ,(make-mu4e-bookmark
        :name "Last 7 days"
        :query "date:7d..now"
-       :key ?w)
-     ,(make-mu4e-bookmark
-       :name "Messages with images"
-       :query "mime:image/*"
-       :key ?p)))
+       :key ?w)))
 ;; set `mu4e-context-policy` and `mu4e-compose-policy` to tweak when mu4e should
 ;; guess or ask the correct context, e.g.
 
@@ -159,25 +155,8 @@
            (setq line-mode-visual nil))
 (add-hook! 'python-mode-hook
            (add-to-list 'company-backends 'company-jedi))
-(defun python-args-to-google-docstring (text &optional make-fields)
-  "Return a reST docstring format for the python arguments in yas-text."
-  (let* ((indent (concat "\n" (make-string (current-column) 32)))
-         (args (python-split-args text))
-     (nr 0)
-         (formatted-args
-      (mapconcat
-       (lambda (x)
-         (concat "   " (nth 0 x)
-             (if make-fields (format " ${%d:arg%d}" (cl-incf nr) nr))
-             (if (nth 1 x) (concat " \(default " (nth 1 x) "\)"))))
-       args
-       indent)))
-    (unless (string= formatted-args "")
-      (concat
-       (mapconcat 'identity
-          (list "" "Args:" formatted-args)
-          indent)
-       "\n"))))
+(require 'python-docstring)
+(add-hook 'python-mode-hook 'python-docstring-minor-mode)
 (defun run-python-script ()
   (interactive)
   (shell-command (format "python %s" (buffer-name)) "*python-output*"))
