@@ -10,7 +10,6 @@
 (setq show-trailing-whitespace t)
 (setq display-line-numbers-type 'relative)
 (setq projectile-project-search-path '("~/code/"))
-(setq shell-file-nae "/bin/sh")
 (setq jedi:complete-on-dot t)
 (add-hook! 'image-mode-hook 'eimp-mode)
 (setq org-directory "~/Dropbox/")
@@ -149,6 +148,19 @@
 
 ;; Store link to message if in header view, not to header query
 (setq org-mu4e-link-query-in-headers-mode nil))
+(setq deft-extensions '("org"))
+(setq deft-directory "~/Dropbox/notes")
+
+
+(use-package zetteldeft
+  :ensure t
+  :after deft
+  :config (zetteldeft-set-classic-keybindings))
+(setq zetteldeft-link-indicator "§"
+      zetteldeft-title-suffix "\n#+TAGS[]: "
+      zetteldeft-id-format "%Y-%m-%d-%H%M"
+      zetteldeft-id-regex "[0-9]\\{4\\}\\(-[0-9]\\{2,\\}\\)\\{3\\}"
+      zetteldeft-tag-regex "[#@][a-z-]+")
 (setq! +latex-viewers '(pdf-tools)
        TeX-view-evince-keep-focus 't)
 (add-hook! 'latex-mode-hook
@@ -188,7 +200,26 @@
         :desc "Fit to Window" "f" 'eimp-fit-image-to-window))
 (map! :leader
       (:prefix ("o")
-        :desc "Open todo.org" "t" (lambda () (interactive) (find-file "~/doc/org/todo.org"))))
+        :desc "Open todo.org" "t" (lambda () (interactive) (find-file "~/Dropbox/todo.org"))))
 (map! :leader
       (:prefix ("o")
         :desc "Open mu4e" "m" 'mu4e))
+(map! :leader
+      (:prefix ("d" . "deft")
+        :desc "deft" "d" 'deft
+        :desc "new search" "D" 'zetteldeft-deft-new-search
+        :desc "refresh" "R" 'deft-refresh
+        :desc "search at point" "s" 'zetteldeft-search-at-point
+        :desc "search current id" "c" 'zetteldeft-search-current-id
+        :desc "follow link" "f" 'zetteldeft-follow-link
+        :desc "avy file other window" "F" 'zetteldeft-avy-file-search-ace-window
+        :desc "avy link search" "l" 'zetteldeft-avy-link-search
+        :desc "avy tag search" "t" 'zetteldeft-avy-tag-search
+        :desc "tag list" "T" 'zetteldeft-tag-buffer
+        :desc "insert id" "i" 'zetteldeft-find-file-id-insert
+        :desc "insert full title" "I" 'zetteldeft-find-file-full-title-insert
+        :desc "find file" "o" 'zetteldeft-find-file
+        :desc "new file" "n" 'zetteldeft-new-file
+        :desc "new file & link" "N" 'zetteldeft-new-file-and-link
+        :desc "rename" "r" 'zetteldeft-file-rename
+        :desc "count words" "x" 'zetteldeft-count-words))

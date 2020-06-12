@@ -57,3 +57,5 @@
 (package! hugo
   :recipe (:host github :repo "aaronbieber/hugo.el"
            :files ("hugo.el")))
+
+(package! zetteldeft)
