@@ -2,6 +2,7 @@
 ;;; Author: Alex Day
 (setq! user-full-name "Alex Day"
        user-full-address "alex@alexday.me")
+(auto-image-file-mode 1)
 (setq! doom-font "JetBrainsMono Nerd Font Mono-13"
        doom-unicode-font "JoyPixels-14")
 (setq custom-safe-themes t)
@@ -161,6 +162,81 @@
       zetteldeft-id-format "%Y-%m-%d-%H%M"
       zetteldeft-id-regex "[0-9]\\{4\\}\\(-[0-9]\\{2,\\}\\)\\{3\\}"
       zetteldeft-tag-regex "[#@][a-z-]+")
+(setq org-roam-directory "~/Dropbox/notes")
+(add-hook 'after-init-hook 'org-roam-mode)
+(require 'org-roam-protocol)
+(setq org-ref-default-bibliography '("~/Dropbox/notes/references.bib"))
+ (setq
+ bibtex-completion-notes-path "~/Dropbox/notes"
+ bibtex-completion-bibliography "~/Dropbox/notes/references.bib"
+ bibtex-completion-pdf-field "file"
+ bibtex-completion-notes-template-multiple-files
+ (concat
+  "#+TITLE: ${title}\n"
+  "#+ROAM_KEY: cite:${=key=}\n\n"
+  "* TODO Notes\n"
+  ":PROPERTIES:\n"
+  ":Custom_ID: ${=key=}\n"
+  ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
+  ":AUTHOR: ${author-abbrev}\n"
+  ":JOURNAL: ${journaltitle}\n"
+  ":DATE: ${date}\n"
+  ":YEAR: ${year}\n"
+  ":DOI: ${doi}\n"
+  ":URL: ${url}\n"
+  ":END:\n\n"
+  )
+ )
+ (use-package org-roam-bibtex
+  :after (org-roam)
+  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :config
+  (setq org-roam-bibtex-preformat-keywords
+   '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
+  (setq orb-templates
+        '(("r" "ref" plain (function org-roam-capture--get-point)
+           ""
+           :file-name "${slug}"
+           :head "#+TITLE: ${=key=}: ${title}\n#+ROAM_KEY: ${ref}
+
+- tags ::
+- keywords :: ${keywords}
+
+\n* ${title}\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
+
+           :unnarrowed t))))
+(use-package org-noter
+  :after (:any org pdf-view)
+  :config
+  (setq
+   ;; The WM can handle splits
+   org-noter-notes-window-location 'other-frame
+   ;; Please stop opening frames
+   org-noter-always-create-frame nil
+   ;; I want to see the whole file
+   org-noter-hide-other nil
+   ;; Everything is relative to the main notes file
+   org-noter-notes-search-path '("~/Dropbox/notes")
+   )
+  )
+(after! pdf-view
+  ;; open pdfs scaled to fit page
+  (setq-default pdf-view-display-size 'fit-width)
+  ;; automatically annotate highlights
+  (setq pdf-annot-activate-created-annotations t
+        pdf-view-resize-factor 1.1)
+   ;; faster motion
+ (map!
+   :map pdf-view-mode-map
+   :n "g g"          #'pdf-view-first-page
+   :n "G"            #'pdf-view-last-page
+   :n "N"            #'pdf-view-next-page-command
+   :n "E"            #'pdf-view-previous-page-command
+   :n "e"            #'evil-collection-pdf-view-previous-line-or-previous-page
+   :n "n"            #'evil-collection-pdf-view-next-line-or-next-page
+   :n "i"            #'org-noter-insert-note ))
+(helm-delete-action-from-source "Edit notes" helm-source-bibtex)
+(helm-add-action-to-source "Edit notes" 'bibtex-completion-edit-notes helm-source-bibtex 0)
 (setq! +latex-viewers '(pdf-tools)
        TeX-view-evince-keep-focus 't)
 (add-hook! 'latex-mode-hook
@@ -205,21 +281,33 @@
       (:prefix ("o")
         :desc "Open mu4e" "m" 'mu4e))
 (map! :leader
-      (:prefix ("d" . "deft")
-        :desc "deft" "d" 'deft
-        :desc "new search" "D" 'zetteldeft-deft-new-search
-        :desc "refresh" "R" 'deft-refresh
-        :desc "search at point" "s" 'zetteldeft-search-at-point
-        :desc "search current id" "c" 'zetteldeft-search-current-id
-        :desc "follow link" "f" 'zetteldeft-follow-link
-        :desc "avy file other window" "F" 'zetteldeft-avy-file-search-ace-window
-        :desc "avy link search" "l" 'zetteldeft-avy-link-search
-        :desc "avy tag search" "t" 'zetteldeft-avy-tag-search
-        :desc "tag list" "T" 'zetteldeft-tag-buffer
-        :desc "insert id" "i" 'zetteldeft-find-file-id-insert
-        :desc "insert full title" "I" 'zetteldeft-find-file-full-title-insert
-        :desc "find file" "o" 'zetteldeft-find-file
-        :desc "new file" "n" 'zetteldeft-new-file
-        :desc "new file & link" "N" 'zetteldeft-new-file-and-link
-        :desc "rename" "r" 'zetteldeft-file-rename
-        :desc "count words" "x" 'zetteldeft-count-words))
+      (:prefix ("d" . "org roam")
+        :desc "backlinks" "d" 'org-roam
+        :desc "find file" "f" 'org-roam-find-file
+        :desc "insert file" "i" 'org-roam-insert
+        :desc "noter" "n" 'org-noter
+        :desc "view bibliography" "b" 'helm-bibtex
+        :desc "insert cite" "c" 'org-ref-helm-insert-cite-link))
+;; (map! :leader
+;;       (:prefix ("d" . "deft")
+;;         :desc "deft" "d" 'deft
+;;         :desc "new search" "D" 'zetteldeft-deft-new-search
+;;         :desc "refresh" "R" 'deft-refresh
+;;         :desc "search at point" "s" 'zetteldeft-search-at-point
+;;         :desc "search current id" "c" 'zetteldeft-search-current-id
+;;         :desc "follow link" "f" 'zetteldeft-follow-link
+;;         :desc "avy file other window" "F" 'zetteldeft-avy-file-search-ace-window
+;;         :desc "avy link search" "l" 'zetteldeft-avy-link-search
+;;         :desc "avy tag search" "t" 'zetteldeft-avy-tag-search
+;;         :desc "tag list" "T" 'zetteldeft-tag-buffer
+;;         :desc "insert id" "i" 'zetteldeft-find-file-id-insert
+;;         :desc "insert full title" "I" 'zetteldeft-find-file-full-title-insert
+;;         :desc "find file" "o" 'zetteldeft-find-file
+;;         :desc "new file" "n" 'zetteldeft-new-file
+;;         :desc "new file & link" "N" 'zetteldeft-new-file-and-link
+;;         :desc "rename" "r" 'zetteldeft-file-rename
+;;         :desc "count words" "x" 'zetteldeft-count-words))
+(evil-define-key 'normal evil-org-mode-map
+  "j" 'evil-next-visual-line
+  "k" 'evil-previous-visual-line)
+(define-key org-noter-doc-mode-map (kbd "i") 'org-noter-insert-note)
