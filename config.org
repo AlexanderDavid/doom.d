@@ -249,13 +249,13 @@ Make org respect some \LaTeX like symbols
 #+END_SRC
 ** Org Ref
 #+BEGIN_SRC emacs-lisp
-(setq org-ref-default-bibliography '("~/Dropbox/notes/references.bib"))
+(setq org-ref-default-bibliography '("~/Dropbox/papers/references.bib"))
 #+END_SRC
 ** Helm Bibtex
 #+BEGIN_SRC emacs-lisp
  (setq
  bibtex-completion-notes-path "~/Dropbox/notes"
- bibtex-completion-bibliography "~/Dropbox/notes/references.bib"
+ bibtex-completion-bibliography "~/Dropbox/papers/references.bib"
  bibtex-completion-pdf-field "file"
  bibtex-completion-notes-template-multiple-files
  (concat
@@ -287,23 +287,24 @@ Make org respect some \LaTeX like symbols
         '(("r" "ref" plain (function org-roam-capture--get-point)
            ""
            :file-name "${slug}"
-           :head "#+TITLE: ${=key=}: ${title}\n#+ROAM_KEY: ${ref}
+           :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}
 
 - tags ::
 - keywords :: ${keywords}
-
 \n* ${title}\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
 
-           :unnarrowed t))))
+           :unnarrowed t
+           :immediate-finish t))))
+
 #+END_SRC
-** Org nOter
+** Org Noter
 #+BEGIN_SRC emacs-lisp
 (use-package org-noter
   :after (:any org pdf-view)
   :config
   (setq
-   ;; The WM can handle splits
-   org-noter-notes-window-location 'other-frame
+   ;; Emacs can handle splits
+   org-noter-notes-window-location 'horizontal-split
    ;; Please stop opening frames
    org-noter-always-create-frame nil
    ;; I want to see the whole file
@@ -334,8 +335,9 @@ Make org respect some \LaTeX like symbols
 #+END_SRC
 ** Helm bibtex
 #+BEGIN_SRC emacs-lisp
-(helm-delete-action-from-source "Edit notes" helm-source-bibtex)
-(helm-add-action-to-source "Edit notes" 'bibtex-completion-edit-notes helm-source-bibtex 0)
+(setq bibtex-completion-library-path '("~/Dropbox/papers"))
+;; (helm-delete-action-from-source "Edit notes" helm-source-bibtex)
+;; (helm-add-action-to-source "Edit notes" 'bibtex-completion-edit-notes helm-source-bibtex 0)
 #+END_SRC
 * Languages
 ** LaTeX

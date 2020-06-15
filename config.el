@@ -165,10 +165,10 @@
 (setq org-roam-directory "~/Dropbox/notes")
 (add-hook 'after-init-hook 'org-roam-mode)
 (require 'org-roam-protocol)
-(setq org-ref-default-bibliography '("~/Dropbox/notes/references.bib"))
+(setq org-ref-default-bibliography '("~/Dropbox/papers/references.bib"))
  (setq
  bibtex-completion-notes-path "~/Dropbox/notes"
- bibtex-completion-bibliography "~/Dropbox/notes/references.bib"
+ bibtex-completion-bibliography "~/Dropbox/papers/references.bib"
  bibtex-completion-pdf-field "file"
  bibtex-completion-notes-template-multiple-files
  (concat
@@ -197,7 +197,7 @@
         '(("r" "ref" plain (function org-roam-capture--get-point)
            ""
            :file-name "${slug}"
-           :head "#+TITLE: ${=key=}: ${title}\n#+ROAM_KEY: ${ref}
+           :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}
 
 - tags ::
 - keywords :: ${keywords}
@@ -209,8 +209,8 @@
   :after (:any org pdf-view)
   :config
   (setq
-   ;; The WM can handle splits
-   org-noter-notes-window-location 'other-frame
+   ;; Emacs can handle splits
+   org-noter-notes-window-location 'horizontal-split
    ;; Please stop opening frames
    org-noter-always-create-frame nil
    ;; I want to see the whole file
@@ -235,8 +235,9 @@
    :n "e"            #'evil-collection-pdf-view-previous-line-or-previous-page
    :n "n"            #'evil-collection-pdf-view-next-line-or-next-page
    :n "i"            #'org-noter-insert-note ))
-(helm-delete-action-from-source "Edit notes" helm-source-bibtex)
-(helm-add-action-to-source "Edit notes" 'bibtex-completion-edit-notes helm-source-bibtex 0)
+(setq bibtex-completion-library-path '("~/Dropbox/papers"))
+;; (helm-delete-action-from-source "Edit notes" helm-source-bibtex)
+;; (helm-add-action-to-source "Edit notes" 'bibtex-completion-edit-notes helm-source-bibtex 0)
 (setq! +latex-viewers '(pdf-tools)
        TeX-view-evince-keep-focus 't)
 (add-hook! 'latex-mode-hook
