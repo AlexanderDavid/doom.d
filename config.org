@@ -434,6 +434,8 @@ Add easy shortcuts for replacing normally and with regular expressions
         :desc "insert file" "i" 'org-roam-insert
         :desc "noter" "n" 'org-noter
         :desc "view bibliography" "b" 'helm-bibtex
+        :desc "view todays note" "t" 'org-roam-dailies-today
+        :desc "view tomorrows note" "m" 'org-roam-dailies-tomorrow
         :desc "insert cite" "c" 'org-ref-helm-insert-cite-link))
 ;; (map! :leader
 ;;       (:prefix ("d" . "deft")

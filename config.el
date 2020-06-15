@@ -201,10 +201,10 @@
 
 - tags ::
 - keywords :: ${keywords}
-
 \n* ${title}\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
 
-           :unnarrowed t))))
+           :unnarrowed t
+           :immediate-finish t))))
 (use-package org-noter
   :after (:any org pdf-view)
   :config
@@ -288,6 +288,8 @@
         :desc "insert file" "i" 'org-roam-insert
         :desc "noter" "n" 'org-noter
         :desc "view bibliography" "b" 'helm-bibtex
+        :desc "view todays note" "t" 'org-roam-dailies-today
+        :desc "view tomorrows note" "m" 'org-roam-dailies-tomorrow
         :desc "insert cite" "c" 'org-ref-helm-insert-cite-link))
 ;; (map! :leader
 ;;       (:prefix ("d" . "deft")
