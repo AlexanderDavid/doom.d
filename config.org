@@ -416,7 +416,7 @@ Add easy shortcuts for replacing normally and with regular expressions
 #+BEGIN_SRC emacs-lisp
 (map! :leader
       (:prefix ("o")
-        :desc "Open todo.org" "t" (lambda () (interactive) (find-file "~/Dropbox/todo.org"))))
+        :desc "Open todo.org" "t" (lambda () (interactive) (find-file "~/Dropbox/todo/todo.org"))))
 #+END_SRC
 ** Open mu4e
 #+BEGIN_SRC emacs-lisp
