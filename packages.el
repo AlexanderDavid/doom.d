@@ -58,9 +58,5 @@
   :recipe (:host github :repo "aaronbieber/hugo.el"
            :files ("hugo.el")))
 
-(package! zetteldeft)
-
-(package! org-roam)
-
 (package! org-ref)
 (package! org-roam-bibtex)

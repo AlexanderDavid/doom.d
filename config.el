@@ -15,6 +15,7 @@
 (add-hook! 'image-mode-hook 'eimp-mode)
 (setq org-directory "~/Dropbox/")
 (setq org-agenda-files '("~/Dropbox/"))
+(require 'org-protocol)
 (setq org-ellipsis " ▼ ")
 (setq org-fontify-done-headline t)
 (custom-set-faces
@@ -26,9 +27,11 @@
      (:strike-through t)))))
 (require 'org-mu4e)
 (setq org-capture-templates
-      '(("t" "Todo" entry (file+olp+datetree "~/Dropbox/todo.org" "Inbox")
+      '(("t" "Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox")
          "* TODO %?\n  %i\n  %a")
-        ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo.org" "Inbox")
+        ("z" "Website Capture" entry (file+headline "~/Dropbox/todo/todo.org" "Inbox")
+    "* %:annotation\n %:initial\n %u\n\n\n%?")
+       ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox")
          "* TODO %?\nProcess mail from %:fromname on %:subject\nSCHEDULED:%t\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n:PROPERTIES:\n:CREATED: %U\n:END:\n %a" :prepend t)))
 
 (setq org-pretty-entities 't)
@@ -163,8 +166,20 @@
       zetteldeft-id-regex "[0-9]\\{4\\}\\(-[0-9]\\{2,\\}\\)\\{3\\}"
       zetteldeft-tag-regex "[#@][a-z-]+")
 (setq org-roam-directory "~/Dropbox/notes")
+(setq org-roam-index-file "~/Dropbox/notes/index.org")
 (add-hook 'after-init-hook 'org-roam-mode)
+(server-start)
 (require 'org-roam-protocol)
+
+(after! org-roam
+      (setq org-roam-ref-capture-templates
+            '(("r" "ref" plain (function org-roam-capture--get-point)
+               "%?"
+               :file-name "${slug}"
+               :head "#+TITLE: ${title}
+    #+ROAM_KEY: ${ref}
+    - source :: ${ref}"
+               :unnarrowed t))))
 (setq org-ref-default-bibliography '("~/Dropbox/papers/references.bib"))
  (setq
  bibtex-completion-notes-path "~/Dropbox/notes"
@@ -284,6 +299,7 @@
 (map! :leader
       (:prefix ("d" . "org roam")
         :desc "backlinks" "d" 'org-roam
+        :desc "jump to index file" "x" 'org-roam-jump-to-index
         :desc "find file" "f" 'org-roam-find-file
         :desc "insert file" "i" 'org-roam-insert
         :desc "noter" "n" 'org-noter
@@ -310,7 +326,8 @@
 ;;         :desc "new file & link" "N" 'zetteldeft-new-file-and-link
 ;;         :desc "rename" "r" 'zetteldeft-file-rename
 ;;         :desc "count words" "x" 'zetteldeft-count-words))
-(evil-define-key 'normal evil-org-mode-map
-  "j" 'evil-next-visual-line
-  "k" 'evil-previous-visual-line)
+(add-hook! 'org-mode-hook
+    (evil-define-key 'normal evil-org-mode-map
+    "j" 'evil-next-visual-line
+    "k" 'evil-previous-visual-line))
 (define-key org-noter-doc-mode-map (kbd "i") 'org-noter-insert-note)

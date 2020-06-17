@@ -74,6 +74,11 @@ Set the default org directory
 (setq org-directory "~/Dropbox/")
 (setq org-agenda-files '("~/Dropbox/"))
 #+END_SRC
+Setup org protocol
+#+BEGIN_SRC emacs-lisp
+(require 'org-protocol)
+
+#+END_SRC
 Set the default ellipsis char
 #+BEGIN_SRC emacs-lisp
 (setq org-ellipsis " ▼ ")
@@ -93,9 +98,11 @@ Modify default capture templates
 #+BEGIN_SRC emacs-lisp
 (require 'org-mu4e)
 (setq org-capture-templates
-      '(("t" "Todo" entry (file+olp+datetree "~/Dropbox/todo.org" "Inbox")
+      '(("t" "Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox")
          "* TODO %?\n  %i\n  %a")
-        ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo.org" "Inbox")
+        ("z" "Website Capture" entry (file+headline "~/Dropbox/todo/todo.org" "Inbox")
+    "* %:annotation\n %:initial\n %u\n\n\n%?")
+       ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox")
          "* TODO %?\nProcess mail from %:fromname on %:subject\nSCHEDULED:%t\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n:PROPERTIES:\n:CREATED: %U\n:END:\n %a" :prepend t)))
 #+END_SRC
 Set agenda defaults
@@ -244,8 +251,20 @@ Make org respect some \LaTeX like symbols
 ** Org Roam
 #+BEGIN_SRC emacs-lisp
 (setq org-roam-directory "~/Dropbox/notes")
+(setq org-roam-index-file "~/Dropbox/notes/index.org")
 (add-hook 'after-init-hook 'org-roam-mode)
+(server-start)
 (require 'org-roam-protocol)
+
+(after! org-roam
+      (setq org-roam-ref-capture-templates
+            '(("r" "ref" plain (function org-roam-capture--get-point)
+               "%?"
+               :file-name "${slug}"
+               :head "#+TITLE: ${title}
+    ,#+ROAM_KEY: ${ref}
+    - source :: ${ref}"
+               :unnarrowed t))))
 #+END_SRC
 ** Org Ref
 #+BEGIN_SRC emacs-lisp
@@ -430,6 +449,7 @@ Add easy shortcuts for replacing normally and with regular expressions
 (map! :leader
       (:prefix ("d" . "org roam")
         :desc "backlinks" "d" 'org-roam
+        :desc "jump to index file" "x" 'org-roam-jump-to-index
         :desc "find file" "f" 'org-roam-find-file
         :desc "insert file" "i" 'org-roam-insert
         :desc "noter" "n" 'org-noter
@@ -460,9 +480,10 @@ Add easy shortcuts for replacing normally and with regular expressions
 
 ** Graphical Movement in evil org
 #+BEGIN_SRC emacs-lisp
-(evil-define-key 'normal evil-org-mode-map
-  "j" 'evil-next-visual-line
-  "k" 'evil-previous-visual-line)
+(add-hook! 'org-mode-hook
+    (evil-define-key 'normal evil-org-mode-map
+    "j" 'evil-next-visual-line
+    "k" 'evil-previous-visual-line))
 #+END_SRC
 
 ** Noter default keys
