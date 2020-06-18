@@ -14,7 +14,6 @@
 (setq jedi:complete-on-dot t)
 (add-hook! 'image-mode-hook 'eimp-mode)
 (setq org-directory "~/Dropbox/")
-(setq org-agenda-files '("~/Dropbox/"))
 (require 'org-protocol)
 (setq org-ellipsis " ▼ ")
 (setq org-fontify-done-headline t)
@@ -31,10 +30,15 @@
          "* TODO %?\n  %i\n  %a")
         ("z" "Website Capture" entry (file+headline "~/Dropbox/todo/todo.org" "Inbox")
     "* %:annotation\n %:initial\n %u\n\n\n%?")
-       ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox")
+       ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox"))
+        ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox")
          "* TODO %?\nProcess mail from %:fromname on %:subject\nSCHEDULED:%t\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n:PROPERTIES:\n:CREATED: %U\n:END:\n %a" :prepend t)))
-
+(setq org-agenda-files '("~/Dropbox/notes/" "~/Dropbox/todo/"))
 (setq org-pretty-entities 't)
+(setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
+(setq org-refile-use-outline-path 'file)
+(setq org-outline-path-complete-in-steps nil)
+(setq org-refile-allow-creating-parent-nodes 'confirm)
 (after! mu4e
 ;; use mu4e for e-mail in emacs
 (setq mail-user-agent 'mu4e-user-agent)
@@ -154,21 +158,12 @@
 (setq org-mu4e-link-query-in-headers-mode nil))
 (setq deft-extensions '("org"))
 (setq deft-directory "~/Dropbox/notes")
-
-
-(use-package zetteldeft
-  :ensure t
-  :after deft
-  :config (zetteldeft-set-classic-keybindings))
-(setq zetteldeft-link-indicator "§"
-      zetteldeft-title-suffix "\n#+TAGS[]: "
-      zetteldeft-id-format "%Y-%m-%d-%H%M"
-      zetteldeft-id-regex "[0-9]\\{4\\}\\(-[0-9]\\{2,\\}\\)\\{3\\}"
-      zetteldeft-tag-regex "[#@][a-z-]+")
+(setq deft-recursive t)
 (setq org-roam-directory "~/Dropbox/notes")
 (setq org-roam-index-file "~/Dropbox/notes/index.org")
 (add-hook 'after-init-hook 'org-roam-mode)
 (server-start)
+(setq org-roam-graph-viewer "/usr/bin/brave")
 (require 'org-roam-protocol)
 
 (after! org-roam
@@ -298,9 +293,9 @@
         :desc "Open mu4e" "m" 'mu4e))
 (map! :leader
       (:prefix ("d" . "org roam")
-        :desc "backlinks" "d" 'org-roam
+        :desc "backlinks" "l" 'org-roam
         :desc "jump to index file" "x" 'org-roam-jump-to-index
-        :desc "find file" "f" 'org-roam-find-file
+        :desc "find file" "d" 'deft
         :desc "insert file" "i" 'org-roam-insert
         :desc "noter" "n" 'org-noter
         :desc "view bibliography" "b" 'helm-bibtex
@@ -326,7 +321,7 @@
 ;;         :desc "new file & link" "N" 'zetteldeft-new-file-and-link
 ;;         :desc "rename" "r" 'zetteldeft-file-rename
 ;;         :desc "count words" "x" 'zetteldeft-count-words))
-(add-hook! 'org-mode-hook
+(add-hook! 'evil-org-mode-hook
     (evil-define-key 'normal evil-org-mode-map
     "j" 'evil-next-visual-line
     "k" 'evil-previous-visual-line))

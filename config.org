@@ -72,7 +72,6 @@ Open images in eimp mode
 Set the default org directory
 #+BEGIN_SRC emacs-lisp
 (setq org-directory "~/Dropbox/")
-(setq org-agenda-files '("~/Dropbox/"))
 #+END_SRC
 Setup org protocol
 #+BEGIN_SRC emacs-lisp
@@ -102,15 +101,24 @@ Modify default capture templates
          "* TODO %?\n  %i\n  %a")
         ("z" "Website Capture" entry (file+headline "~/Dropbox/todo/todo.org" "Inbox")
     "* %:annotation\n %:initial\n %u\n\n\n%?")
-       ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox")
+       ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox"))
+        ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox")
          "* TODO %?\nProcess mail from %:fromname on %:subject\nSCHEDULED:%t\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n:PROPERTIES:\n:CREATED: %U\n:END:\n %a" :prepend t)))
 #+END_SRC
 Set agenda defaults
 #+BEGIN_SRC emacs-lisp
+(setq org-agenda-files '("~/Dropbox/notes/" "~/Dropbox/todo/"))
 #+END_SRC
 Make org respect some \LaTeX like symbols
 #+BEGIN_SRC emacs-lisp
 (setq org-pretty-entities 't)
+#+END_SRC
+Make org refile more aware of all org files
+#+BEGIN_SRC emacs-lisp
+(setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
+(setq org-refile-use-outline-path 'file)
+(setq org-outline-path-complete-in-steps nil)
+(setq org-refile-allow-creating-parent-nodes 'confirm)
 #+END_SRC
 ** mu4e
 #+BEGIN_SRC emacs-lisp
@@ -232,21 +240,11 @@ Make org respect some \LaTeX like symbols
 ;; Store link to message if in header view, not to header query
 (setq org-mu4e-link-query-in-headers-mode nil))
 #+END_SRC
-** Zetteldeft
+** Deft
 #+BEGIN_SRC emacs-lisp
 (setq deft-extensions '("org"))
 (setq deft-directory "~/Dropbox/notes")
-
-
-(use-package zetteldeft
-  :ensure t
-  :after deft
-  :config (zetteldeft-set-classic-keybindings))
-(setq zetteldeft-link-indicator "§"
-      zetteldeft-title-suffix "\n#+TAGS[]: "
-      zetteldeft-id-format "%Y-%m-%d-%H%M"
-      zetteldeft-id-regex "[0-9]\\{4\\}\\(-[0-9]\\{2,\\}\\)\\{3\\}"
-      zetteldeft-tag-regex "[#@][a-z-]+")
+(setq deft-recursive t)
 #+END_SRC
 ** Org Roam
 #+BEGIN_SRC emacs-lisp
@@ -254,6 +252,7 @@ Make org respect some \LaTeX like symbols
 (setq org-roam-index-file "~/Dropbox/notes/index.org")
 (add-hook 'after-init-hook 'org-roam-mode)
 (server-start)
+(setq org-roam-graph-viewer "/usr/bin/brave")
 (require 'org-roam-protocol)
 
 (after! org-roam
@@ -448,9 +447,9 @@ Add easy shortcuts for replacing normally and with regular expressions
 #+BEGIN_SRC emacs-lisp
 (map! :leader
       (:prefix ("d" . "org roam")
-        :desc "backlinks" "d" 'org-roam
+        :desc "backlinks" "l" 'org-roam
         :desc "jump to index file" "x" 'org-roam-jump-to-index
-        :desc "find file" "f" 'org-roam-find-file
+        :desc "find file" "d" 'deft
         :desc "insert file" "i" 'org-roam-insert
         :desc "noter" "n" 'org-noter
         :desc "view bibliography" "b" 'helm-bibtex
@@ -480,7 +479,7 @@ Add easy shortcuts for replacing normally and with regular expressions
 
 ** Graphical Movement in evil org
 #+BEGIN_SRC emacs-lisp
-(add-hook! 'org-mode-hook
+(add-hook! 'evil-org-mode-hook
     (evil-define-key 'normal evil-org-mode-map
     "j" 'evil-next-visual-line
     "k" 'evil-previous-visual-line))
