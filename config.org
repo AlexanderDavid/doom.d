@@ -93,6 +93,13 @@ Strike through done tasks
    ((((class color) (min-colors 16) (background dark))
      (:strike-through t)))))
 #+END_SRC
+Only refile to the important files. Not to my calendar files.
+#+BEGIN_SRC emacs-lisp
+(setq org-refile-targets
+      '(("tickler.org" :maxlevel . 1)
+        ("someday.org" :maxlevel . 1)
+        ("projects.org" :maxlevel . 1)))
+#+END_SRC
 Modify default capture templates
 #+BEGIN_SRC emacs-lisp
 (require 'org-mu4e)
