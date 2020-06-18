@@ -59,4 +59,5 @@
            :files ("hugo.el")))
 
 (package! org-ref)
+(package! company-org-roam)
 (package! org-roam-bibtex)

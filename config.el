@@ -13,7 +13,7 @@
 (setq projectile-project-search-path '("~/code/"))
 (setq jedi:complete-on-dot t)
 (add-hook! 'image-mode-hook 'eimp-mode)
-(setq org-directory "~/Dropbox/")
+(setq org-directory "~/Dropbox/gtd/")
 (require 'org-protocol)
 (setq org-ellipsis " ▼ ")
 (setq org-fontify-done-headline t)
@@ -26,19 +26,104 @@
      (:strike-through t)))))
 (require 'org-mu4e)
 (setq org-capture-templates
-      '(("t" "Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox")
-         "* TODO %?\n  %i\n  %a")
-        ("z" "Website Capture" entry (file+headline "~/Dropbox/todo/todo.org" "Inbox")
-    "* %:annotation\n %:initial\n %u\n\n\n%?")
-       ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox"))
-        ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/todo/todo.org" "Inbox")
+      '(("t" "Todo" entry (file+headline "~/Dropbox/gtd/inbox.org" "Inbox")
+         "* TODO %?\n  %i\n%t\n%a")
+
+        ("T" "Tickler" entry (file+headline "~/Dropbox/gtd/tickler.org" "Tickler")
+         "* TODO %?\n  %i\n%t\n%a")
+
+        ("z" "Website Capture" entry (file+headline "~/Dropbox/gtd/inbox.org" "Inbox")
+        "* TODO %:annotation\n %:initial\n %u\n\n\n%?")
+
+        ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/gtd/inbox.org" "Inbox")
          "* TODO %?\nProcess mail from %:fromname on %:subject\nSCHEDULED:%t\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n:PROPERTIES:\n:CREATED: %U\n:END:\n %a" :prepend t)))
-(setq org-agenda-files '("~/Dropbox/notes/" "~/Dropbox/todo/"))
+(setq org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+(defun air-org-skip-subtree-if-priority (priority)
+  "Skip an agenda subtree if it has a priority of PRIORITY.
+
+PRIORITY may be one of the characters ?A, ?B, or ?C."
+  (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+        (pri-value (* 1000 (- org-lowest-priority priority)))
+        (pri-current (org-get-priority (thing-at-point 'line t))))
+    (if (= pri-value pri-current)
+        subtree-end
+      nil)))
+
+(setq org-agenda-use-time-grid nil)
+(setq org-agenda-files (list org-directory))
+(setq org-agenda-custom-commands
+      '(("c" "Simple agenda view"
+         ((tags "PRIORITY=\"A\""
+                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                 (org-agenda-overriding-header "High-priority unfinished tasks:")))
+          (agenda "")
+          (alltodo ""
+                   ((org-agenda-skip-function
+                     '(or (air-org-skip-subtree-if-priority ?A)
+                          (org-agenda-skip-if nil '(scheduled deadline))))))))
+          ("h" "Home tasks" tags-todo "HOME"
+            ((org-agenda-overriding-header "Home Tasks")))
+        ("s" "School tasks" tags-todo "SCHOOL"
+         ((org-agenda-overriding-header "School Tasks")))
+        ("w" "Work tasks" tags-todo "WORK"
+         ((org-agenda-overriding-header "Work Tasks")))))
 (setq org-pretty-entities 't)
 (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
 (setq org-refile-use-outline-path 'file)
 (setq org-outline-path-complete-in-steps nil)
 (setq org-refile-allow-creating-parent-nodes 'confirm)
+(setq org-roam-directory "~/Dropbox/notes")
+(setq org-roam-index-file "~/Dropbox/notes/index.org")
+(add-hook 'after-init-hook 'org-roam-mode)
+(server-start)
+(setq org-roam-graph-viewer "/usr/bin/brave")
+(require 'org-roam-protocol)
+
+(after! org-roam
+      (setq org-roam-ref-capture-templates
+            '(("r" "ref" plain (function org-roam-capture--get-point)
+               "%?"
+               :file-name "${slug}"
+               :head "#+TITLE: ${title}
+    #+ROAM_KEY: ${ref}
+    - source :: ${ref}"
+               :unnarrowed t))))
+(setq org-ref-default-bibliography '("~/Dropbox/papers/references.bib"))
+ (use-package org-roam-bibtex
+  :after (org-roam)
+  :hook (org-roam-mode . org-roam-bibtex-mode)
+  :config
+  (setq org-roam-bibtex-preformat-keywords
+   '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
+  (setq orb-templates
+        '(("r" "ref" plain (function org-roam-capture--get-point)
+           ""
+           :file-name "${slug}"
+           :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}
+
+- tags ::
+- keywords :: ${keywords}
+\n* ${title}\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
+
+           :unnarrowed t
+           :immediate-finish t))))
+(use-package org-noter
+  :after (:any org pdf-view)
+  :config
+  (setq
+   ;; Emacs can handle splits
+   org-noter-notes-window-location 'horizontal-split
+   ;; Please stop opening frames
+   org-noter-always-create-frame nil
+   ;; I want to see the whole file
+   org-noter-hide-other nil
+   ;; Everything is relative to the main notes file
+   org-noter-notes-search-path '("~/Dropbox/notes")
+   )
+  )
+(setq deft-extensions '("org"))
+(setq deft-directory "~/Dropbox/notes")
+(setq deft-recursive t)
 (after! mu4e
 ;; use mu4e for e-mail in emacs
 (setq mail-user-agent 'mu4e-user-agent)
@@ -156,26 +241,6 @@
 
 ;; Store link to message if in header view, not to header query
 (setq org-mu4e-link-query-in-headers-mode nil))
-(setq deft-extensions '("org"))
-(setq deft-directory "~/Dropbox/notes")
-(setq deft-recursive t)
-(setq org-roam-directory "~/Dropbox/notes")
-(setq org-roam-index-file "~/Dropbox/notes/index.org")
-(add-hook 'after-init-hook 'org-roam-mode)
-(server-start)
-(setq org-roam-graph-viewer "/usr/bin/brave")
-(require 'org-roam-protocol)
-
-(after! org-roam
-      (setq org-roam-ref-capture-templates
-            '(("r" "ref" plain (function org-roam-capture--get-point)
-               "%?"
-               :file-name "${slug}"
-               :head "#+TITLE: ${title}
-    #+ROAM_KEY: ${ref}
-    - source :: ${ref}"
-               :unnarrowed t))))
-(setq org-ref-default-bibliography '("~/Dropbox/papers/references.bib"))
  (setq
  bibtex-completion-notes-path "~/Dropbox/notes"
  bibtex-completion-bibliography "~/Dropbox/papers/references.bib"
@@ -197,38 +262,6 @@
   ":END:\n\n"
   )
  )
- (use-package org-roam-bibtex
-  :after (org-roam)
-  :hook (org-roam-mode . org-roam-bibtex-mode)
-  :config
-  (setq org-roam-bibtex-preformat-keywords
-   '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
-  (setq orb-templates
-        '(("r" "ref" plain (function org-roam-capture--get-point)
-           ""
-           :file-name "${slug}"
-           :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}
-
-- tags ::
-- keywords :: ${keywords}
-\n* ${title}\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
-
-           :unnarrowed t
-           :immediate-finish t))))
-(use-package org-noter
-  :after (:any org pdf-view)
-  :config
-  (setq
-   ;; Emacs can handle splits
-   org-noter-notes-window-location 'horizontal-split
-   ;; Please stop opening frames
-   org-noter-always-create-frame nil
-   ;; I want to see the whole file
-   org-noter-hide-other nil
-   ;; Everything is relative to the main notes file
-   org-noter-notes-search-path '("~/Dropbox/notes")
-   )
-  )
 (after! pdf-view
   ;; open pdfs scaled to fit page
   (setq-default pdf-view-display-size 'fit-width)
@@ -287,7 +320,10 @@
         :desc "Fit to Window" "f" 'eimp-fit-image-to-window))
 (map! :leader
       (:prefix ("o")
-        :desc "Open todo.org" "t" (lambda () (interactive) (find-file "~/Dropbox/todo/todo.org"))))
+        :desc "Open inbox.org" "i" (lambda () (interactive) (find-file "~/Dropbox/gtd/inbox.org"))
+        :desc "Open tickler.org" "t" (lambda () (interactive) (find-file "~/Dropbox/gtd/tickler.org"))
+        :desc "Open someday.org" "s" (lambda () (interactive) (find-file "~/Dropbox/gtd/someday.org"))
+        :desc "Open projects.org" "p" (lambda () (interactive) (find-file "~/Dropbox/gtd/projects.org"))))
 (map! :leader
       (:prefix ("o")
         :desc "Open mu4e" "m" 'mu4e))
