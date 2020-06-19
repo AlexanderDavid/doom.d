@@ -18,12 +18,12 @@
 (setq org-ellipsis " ▼ ")
 (setq org-fontify-done-headline t)
 (custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-done ((t (:weight bold :strike-through nil))))
- '(org-headline-done ((((class color) (min-colors 16) (background dark)) (:strike-through t)))))
+ '(org-done ((t (
+                 :weight bold
+                 :strike-through nil))))
+ '(org-headline-done
+   ((((class color) (min-colors 16) (background dark))
+     (:strike-through t)))))
 (setq org-tags-column 50)
 (setq org-refile-targets
       '(("tickler.org" :maxlevel . 1)
@@ -70,8 +70,9 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
             ((org-agenda-overriding-header "Home Tasks")))
         ("s" "School tasks" tags-todo "SCHOOL"
          ((org-agenda-overriding-header "School Tasks")))
-        ("w" "Work tasks" tags-todo "WORK"
-         ((org-agenda-overriding-header "Work Tasks")))))
+        ("w" "Work tasks" ((agenda "") (tags-todo "WORK"))
+         ((org-agenda-overriding-header "Work Tasks")
+          (org-agenda-tag-filter-preset "WORK")))))
 (setq org-pretty-entities 't)
 (setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
 (setq org-refile-use-outline-path 'file)
@@ -80,7 +81,6 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
 (setq org-roam-directory "~/Dropbox/notes")
 (setq org-roam-index-file "~/Dropbox/notes/index.org")
 (add-hook 'after-init-hook 'org-roam-mode)
-(server-start)
 (setq org-roam-graph-viewer "/usr/bin/brave")
 (require 'org-roam-protocol)
 
@@ -126,6 +126,9 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
    org-noter-notes-search-path '("~/Dropbox/notes")
    )
   )
+(use-package ox-hugo
+  :ensure t            ;Auto-install the package from Melpa (optional)
+  :after ox)
 (setq deft-extensions '("org"))
 (setq deft-directory "~/Dropbox/notes")
 (setq deft-recursive t)
@@ -337,44 +340,15 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
         :desc "backlinks" "l" 'org-roam
         :desc "jump to index file" "x" 'org-roam-jump-to-index
         :desc "find file" "d" 'deft
+        :desc "new file" "f" 'org-roam-find-file
+        :desc "show graph" "g" 'org-roam-graph
         :desc "insert file" "i" 'org-roam-insert
         :desc "noter" "n" 'org-noter
         :desc "view bibliography" "b" 'helm-bibtex
-        :desc "view todays note" "t" 'org-roam-dailies-today
-        :desc "view tomorrows note" "m" 'org-roam-dailies-tomorrow
+        :desc "Start/stop server" "s" 'org-roam-server-mode
         :desc "insert cite" "c" 'org-ref-helm-insert-cite-link))
-;; (map! :leader
-;;       (:prefix ("d" . "deft")
-;;         :desc "deft" "d" 'deft
-;;         :desc "new search" "D" 'zetteldeft-deft-new-search
-;;         :desc "refresh" "R" 'deft-refresh
-;;         :desc "search at point" "s" 'zetteldeft-search-at-point
-;;         :desc "search current id" "c" 'zetteldeft-search-current-id
-;;         :desc "follow link" "f" 'zetteldeft-follow-link
-;;         :desc "avy file other window" "F" 'zetteldeft-avy-file-search-ace-window
-;;         :desc "avy link search" "l" 'zetteldeft-avy-link-search
-;;         :desc "avy tag search" "t" 'zetteldeft-avy-tag-search
-;;         :desc "tag list" "T" 'zetteldeft-tag-buffer
-;;         :desc "insert id" "i" 'zetteldeft-find-file-id-insert
-;;         :desc "insert full title" "I" 'zetteldeft-find-file-full-title-insert
-;;         :desc "find file" "o" 'zetteldeft-find-file
-;;         :desc "new file" "n" 'zetteldeft-new-file
-;;         :desc "new file & link" "N" 'zetteldeft-new-file-and-link
-;;         :desc "rename" "r" 'zetteldeft-file-rename
-;;         :desc "count words" "x" 'zetteldeft-count-words))
 (add-hook! 'evil-org-mode-hook
     (evil-define-key 'normal evil-org-mode-map
     "j" 'evil-next-visual-line
     "k" 'evil-previous-visual-line))
 (define-key org-noter-doc-mode-map (kbd "i") 'org-noter-insert-note)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(org-agenda-files
-   (quote
-    ("/home/alex/Dropbox/gtd/projects.org" "/home/alex/Dropbox/gtd/clemson.org" "/home/alex/Dropbox/gtd/inbox.org" "/home/alex/Dropbox/gtd/jgms.org" "/home/alex/Dropbox/gtd/personal.org" "/home/alex/Dropbox/gtd/someday.org" "/home/alex/Dropbox/gtd/tickler.org" "/home/alex/Dropbox/gtd/todo.org")))
- '(package-selected-packages
-   (quote
-    (gruvbox-theme yaml-mode writeroom-mode pretty-symbols deft))))

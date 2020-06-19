@@ -154,10 +154,9 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
             ((org-agenda-overriding-header "Home Tasks")))
         ("s" "School tasks" tags-todo "SCHOOL"
          ((org-agenda-overriding-header "School Tasks")))
-        ("w "Work Tasks")))
-        ;; ("w" "Work tasks" ((agenda "") (tags-todo "WORK"))
-        ;;  ((org-agenda-overriding-header "Work Tasks")
-        ;;   (org-agenda-tag-filter-preset "WORK")))))
+        ("w" "Work tasks" ((agenda "") (tags-todo "WORK"))
+         ((org-agenda-overriding-header "Work Tasks")
+          (org-agenda-tag-filter-preset "WORK")))))
 #+END_SRC
 Make org respect some \LaTeX like symbols
 #+BEGIN_SRC emacs-lisp
@@ -175,7 +174,6 @@ Make org refile more aware of all org files
 (setq org-roam-directory "~/Dropbox/notes")
 (setq org-roam-index-file "~/Dropbox/notes/index.org")
 (add-hook 'after-init-hook 'org-roam-mode)
-(server-start)
 (setq org-roam-graph-viewer "/usr/bin/brave")
 (require 'org-roam-protocol)
 
@@ -231,6 +229,12 @@ Make org refile more aware of all org files
    org-noter-notes-search-path '("~/Dropbox/notes")
    )
   )
+#+END_SRC
+** Ox Hugo
+#+BEGIN_SRC emacs-lisp
+(use-package ox-hugo
+  :ensure t            ;Auto-install the package from Melpa (optional)
+  :after ox)
 #+END_SRC
 ** Deft
 #+BEGIN_SRC emacs-lisp
@@ -496,38 +500,20 @@ Add easy shortcuts for replacing normally and with regular expressions
         :desc "Open mu4e" "m" 'mu4e))
 #+END_SRC
 
-** Notes
+** Org Roam
 #+BEGIN_SRC emacs-lisp
 (map! :leader
       (:prefix ("d" . "org roam")
         :desc "backlinks" "l" 'org-roam
         :desc "jump to index file" "x" 'org-roam-jump-to-index
         :desc "find file" "d" 'deft
+        :desc "new file" "f" 'org-roam-find-file
+        :desc "show graph" "g" 'org-roam-graph
         :desc "insert file" "i" 'org-roam-insert
         :desc "noter" "n" 'org-noter
         :desc "view bibliography" "b" 'helm-bibtex
-        :desc "view todays note" "t" 'org-roam-dailies-today
-        :desc "view tomorrows note" "m" 'org-roam-dailies-tomorrow
+        :desc "Start/stop server" "s" 'org-roam-server-mode
         :desc "insert cite" "c" 'org-ref-helm-insert-cite-link))
-;; (map! :leader
-;;       (:prefix ("d" . "deft")
-;;         :desc "deft" "d" 'deft
-;;         :desc "new search" "D" 'zetteldeft-deft-new-search
-;;         :desc "refresh" "R" 'deft-refresh
-;;         :desc "search at point" "s" 'zetteldeft-search-at-point
-;;         :desc "search current id" "c" 'zetteldeft-search-current-id
-;;         :desc "follow link" "f" 'zetteldeft-follow-link
-;;         :desc "avy file other window" "F" 'zetteldeft-avy-file-search-ace-window
-;;         :desc "avy link search" "l" 'zetteldeft-avy-link-search
-;;         :desc "avy tag search" "t" 'zetteldeft-avy-tag-search
-;;         :desc "tag list" "T" 'zetteldeft-tag-buffer
-;;         :desc "insert id" "i" 'zetteldeft-find-file-id-insert
-;;         :desc "insert full title" "I" 'zetteldeft-find-file-full-title-insert
-;;         :desc "find file" "o" 'zetteldeft-find-file
-;;         :desc "new file" "n" 'zetteldeft-new-file
-;;         :desc "new file & link" "N" 'zetteldeft-new-file-and-link
-;;         :desc "rename" "r" 'zetteldeft-file-rename
-;;         :desc "count words" "x" 'zetteldeft-count-words))
 #+END_SRC
 
 ** Graphical Movement in evil org
