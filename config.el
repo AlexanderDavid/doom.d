@@ -18,12 +18,17 @@
 (setq org-ellipsis " ▼ ")
 (setq org-fontify-done-headline t)
 (custom-set-faces
- '(org-done ((t (
-                 :weight bold
-                 :strike-through nil))))
- '(org-headline-done
-   ((((class color) (min-colors 16) (background dark))
-     (:strike-through t)))))
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-done ((t (:weight bold :strike-through nil))))
+ '(org-headline-done ((((class color) (min-colors 16) (background dark)) (:strike-through t)))))
+(setq org-tags-column 50)
+(setq org-refile-targets
+      '(("tickler.org" :maxlevel . 1)
+        ("someday.org" :maxlevel . 1)
+        ("projects.org" :maxlevel . 3)))
 (require 'org-mu4e)
 (setq org-capture-templates
       '(("t" "Todo" entry (file+headline "~/Dropbox/gtd/inbox.org" "Inbox")
@@ -362,3 +367,14 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
     "j" 'evil-next-visual-line
     "k" 'evil-previous-visual-line))
 (define-key org-noter-doc-mode-map (kbd "i") 'org-noter-insert-note)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(org-agenda-files
+   (quote
+    ("/home/alex/Dropbox/gtd/projects.org" "/home/alex/Dropbox/gtd/clemson.org" "/home/alex/Dropbox/gtd/inbox.org" "/home/alex/Dropbox/gtd/jgms.org" "/home/alex/Dropbox/gtd/personal.org" "/home/alex/Dropbox/gtd/someday.org" "/home/alex/Dropbox/gtd/tickler.org" "/home/alex/Dropbox/gtd/todo.org")))
+ '(package-selected-packages
+   (quote
+    (gruvbox-theme yaml-mode writeroom-mode pretty-symbols deft))))

@@ -93,12 +93,16 @@ Strike through done tasks
    ((((class color) (min-colors 16) (background dark))
      (:strike-through t)))))
 #+END_SRC
+Set the org tags to the right
+#+BEGIN_SRC emacs-lisp
+(setq org-tags-column 50)
+#+END_SRC
 Only refile to the important files. Not to my calendar files.
 #+BEGIN_SRC emacs-lisp
 (setq org-refile-targets
       '(("tickler.org" :maxlevel . 1)
         ("someday.org" :maxlevel . 1)
-        ("projects.org" :maxlevel . 1)))
+        ("projects.org" :maxlevel . 3)))
 #+END_SRC
 Modify default capture templates
 #+BEGIN_SRC emacs-lisp
@@ -150,8 +154,10 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
             ((org-agenda-overriding-header "Home Tasks")))
         ("s" "School tasks" tags-todo "SCHOOL"
          ((org-agenda-overriding-header "School Tasks")))
-        ("w" "Work tasks" tags-todo "WORK"
-         ((org-agenda-overriding-header "Work Tasks")))))
+        ("w "Work Tasks")))
+        ;; ("w" "Work tasks" ((agenda "") (tags-todo "WORK"))
+        ;;  ((org-agenda-overriding-header "Work Tasks")
+        ;;   (org-agenda-tag-filter-preset "WORK")))))
 #+END_SRC
 Make org respect some \LaTeX like symbols
 #+BEGIN_SRC emacs-lisp
