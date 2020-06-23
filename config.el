@@ -1,8 +1,7 @@
 ;;; Config.el --- -*- lexical-binding: t -*-
 ;;; Author: Alex Day
 (setq! user-full-name "Alex Day"
-       user-full-address "alex@alexday.me")
-(auto-image-file-mode 1)
+       user-mail-address "alexday135@gmail")
 (setq! doom-font "JetBrainsMono Nerd Font Mono-13"
        doom-unicode-font "JoyPixels-14")
 (setq custom-safe-themes t)
@@ -13,6 +12,7 @@
 (setq projectile-project-search-path '("~/code/"))
 (setq jedi:complete-on-dot t)
 (add-hook! 'image-mode-hook 'eimp-mode)
+(auto-image-file-mode 1)
 (setq org-directory "~/Dropbox/gtd/")
 (require 'org-protocol)
 (setq org-ellipsis " ▼ ")
@@ -34,14 +34,32 @@
       '(("t" "Todo" entry (file+headline "~/Dropbox/gtd/inbox.org" "Inbox")
          "* TODO %?\n  %i\n%t\n%a")
 
+        ("d" "Review: Daily Review" entry (file+datetree "~/Dropbox/gtd/reviews.org") (file "~/Dropbox/gtd/templates/dailyreviewtemplate.org"))
+
         ("T" "Tickler" entry (file+headline "~/Dropbox/gtd/tickler.org" "Tickler")
          "* TODO %?\n  %i\n%t\n%a")
 
         ("z" "Website Capture" entry (file+headline "~/Dropbox/gtd/inbox.org" "Inbox")
         "* TODO %:annotation\n %:initial\n %u\n\n\n%?")
 
-        ("e" "Email Todo" entry (file+olp+datetree "~/Dropbox/gtd/inbox.org" "Inbox")
-         "* TODO %?\nProcess mail from %:fromname on %:subject\nSCHEDULED:%t\nDEADLINE: %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n:PROPERTIES:\n:CREATED: %U\n:END:\n %a" :prepend t)))
+        ("e" "Email" entry (file+headline "~/Dropbox/gtd/inbox.org" "Inbox")
+            "* TODO [#A] Reply: %a %(create-mail-tag)\n%:date-timestamp"
+            :immediate-finish t)))
+
+(defun create-mail-tag ()
+  (let ((to (plist-get org-store-link-plist :to)))
+    (if (equal to "'Alex Day' <alexday135@gmail.com>")
+        ":@home:"
+        ":@school:")))
+
+    ;; (format "%s" to)))
+;; (setq org-capture-templates-contexts
+;;       '(("e" (in-mode . "mu4e-headers-mode"))))
+        ;; ("e" (in-mode . "mu4e-view-mode"))))
+(setq org-capture-templates-contexts
+      '(("e" ((in-mode . "mu4e-view-mode")
+	      (in-mode . "mu4e-message-mode")
+          (in-mode . "mu4e-headers-mode")))))
 (setq org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
 (defun air-org-skip-subtree-if-priority (priority)
   "Skip an agenda subtree if it has a priority of PRIORITY.
@@ -93,7 +111,8 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
     #+ROAM_KEY: ${ref}
     - source :: ${ref}"
                :unnarrowed t))))
-(setq org-ref-default-bibliography '("~/Dropbox/papers/references.bib"))
+(setq org-roam-graph-edge-cites-extra-config '(("color" . "red")))
+(setq org-ref-default-bibliography '("~/Dropbox/notes/papers/references.bib"))
  (use-package org-roam-bibtex
   :after (org-roam)
   :hook (org-roam-mode . org-roam-bibtex-mode)
@@ -108,7 +127,7 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
 
 - tags ::
 - keywords :: ${keywords}
-\n* ${title}\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
+\n* [[%(orb-process-file-field \"${=key=}\")][${title}]]\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
 
            :unnarrowed t
            :immediate-finish t))))
@@ -251,8 +270,9 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
 (setq org-mu4e-link-query-in-headers-mode nil))
  (setq
  bibtex-completion-notes-path "~/Dropbox/notes"
- bibtex-completion-bibliography "~/Dropbox/papers/references.bib"
+ bibtex-completion-bibliography "~/Dropbox/notes/papers/references.bib"
  bibtex-completion-pdf-field "file"
+ bibtex-completion-library-path '("~/Dropbox/notes/papers")
  bibtex-completion-notes-template-multiple-files
  (concat
   "#+TITLE: ${title}\n"
@@ -270,6 +290,9 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
   ":END:\n\n"
   )
  )
+(after! helm-bibtex
+    (helm-delete-action-from-source "Edit notes" helm-source-bibtex)
+    (helm-add-action-to-source "Edit notes" 'helm-bibtex-edit-notes helm-source-bibtex 0))
 (after! pdf-view
   ;; open pdfs scaled to fit page
   (setq-default pdf-view-display-size 'fit-width)
@@ -286,9 +309,25 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
    :n "e"            #'evil-collection-pdf-view-previous-line-or-previous-page
    :n "n"            #'evil-collection-pdf-view-next-line-or-next-page
    :n "i"            #'org-noter-insert-note ))
-(setq bibtex-completion-library-path '("~/Dropbox/papers"))
-;; (helm-delete-action-from-source "Edit notes" helm-source-bibtex)
-;; (helm-add-action-to-source "Edit notes" 'bibtex-completion-edit-notes helm-source-bibtex 0)
+(after! org
+  (after! org-ref
+    (after! ox-hugo
+        (add-to-list 'org-ref-formatted-citation-formats
+                    '("md"
+                        ("article" . "${author}, *${title}*, ${journal}, *${volume}(${number})*, ${pages} (${year}). ${doi}")
+                        ("inproceedings" . "${author}, *${title}*, ${editor}, ${booktitle} (pp. ${pages}) (${year}). ${address}: ${publisher}.")
+                        ("book" . "${author}, *${title}* (${year}), ${address}: ${publisher}.")
+                        ("phdthesis" . "${author}, *${title}* (Doctoral dissertation) (${year}). ${school}, ${address}.")
+                        ("inbook" . "${author}, *${title}*, In ${editor} (Eds.), ${booktitle} (pp. ${pages}) (${year}). ${address}: ${publisher}.")
+                        ("incollection" . "${author}, *${title}*, In ${editor} (Eds.), ${booktitle} (pp. ${pages}) (${year}). ${address}: ${publisher}.")
+                        ("proceedings" . "${editor} (Eds.), _${booktitle}_ (${year}). ${address}: ${publisher}.")
+                        ("unpublished" . "${author}, *${title}* (${year}). Unpublished manuscript.")
+                        ("misc" . "${author} (${year}). *${title}*. Retrieved from [${howpublished}](${howpublished}). ${note}.")
+                        (nil . "${author}, *${title}* (${year})."))))))
+(require 'org-download)
+(setq-default org-download-image-dir "~/Dropbox/notes/images")
+(setq-default org-download-heading-lvl nil)
+(setq org-download-screenshot-method "maim -s -d 0.1 %s")
 (setq! +latex-viewers '(pdf-tools)
        TeX-view-evince-keep-focus 't)
 (add-hook! 'latex-mode-hook
@@ -345,7 +384,7 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
         :desc "insert file" "i" 'org-roam-insert
         :desc "noter" "n" 'org-noter
         :desc "view bibliography" "b" 'helm-bibtex
-        :desc "Start/stop server" "s" 'org-roam-server-mode
+        :desc "Insert screenshot" "s" 'org-download-screenshot
         :desc "insert cite" "c" 'org-ref-helm-insert-cite-link))
 (add-hook! 'evil-org-mode-hook
     (evil-define-key 'normal evil-org-mode-map

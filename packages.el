@@ -21,7 +21,6 @@
 
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;(package! some-package)
-
 ;; To install a package directly from a particular repo, you'll need to specify
 ;; a `:recipe'. You'll find documentation on what `:recipe' accepts here:
 ;; https://github.com/raxod502/straight.el#the-recipe-format
@@ -50,6 +49,10 @@
 ;; our package manager can't deal with; see raxod502/straight.el#279)
 ;(package! builtin-package :recipe (:branch "develop"))
 
+(package! org-ref-ox-hugo
+  :recipe (:host github :repo "jethrokuan/org-ref-ox-hugo" :branch "custom/overrides"))
+
+
 (package! python-docstring
   :recipe (:host github :repo "AlexanderDavid/python-docstring"
            :files ("python-docstring.el")))
@@ -64,3 +67,5 @@
 (package! org-roam-bibtex)
 (package! org-roam-server)
 (package! ox-hugo)
+(package! cdlatex)
+(package! org-download)
