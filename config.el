@@ -14,7 +14,63 @@
 (add-hook! 'image-mode-hook 'eimp-mode)
 (auto-image-file-mode 1)
 (setq org-directory "~/Dropbox/gtd/")
+(add-hook 'org-mode-hook 'org-fragtog-mode)
 (require 'org-protocol)
+(setq org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "DOING(D)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+(setq org-treat-insert-todo-heading-as-state-change t)
+(setq org-log-into-drawer t)
+(setq org-super-agenda-date-format "%A, %e %b")
+(setq org-super-agenda-groups
+        '((:name "Habits"
+            :habit t)
+        (:name "Overdue"
+            :deadline past
+            :habit nil)
+        (:name "Scheduled"
+            :time-grid t
+            :habit nil)
+        (:name "Today"
+            :scheduled today
+            :deadline nil
+            :habit nil)
+        (:name "Due Today"
+            :deadline today)
+        (:name "Upcoming"
+            :deadline future
+            :scheduled future)))
+;; (defun air-org-skip-subtree-if-priority (priority)
+;;   "Skip an agenda subtree if it has a priority of PRIORITY.
+
+;; PRIORITY may be one of the characters ?A, ?B, or ?C."
+;;   (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+;;         (pri-value (* 1000 (- org-lowest-priority priority)))
+;;         (pri-current (org-get-priority (thing-at-point 'line t))))
+;;     (if (= pri-value pri-current)
+;;         subtree-end
+;;       nil)))
+
+;; (setq org-agenda-use-time-grid nil)
+;; (setq org-agenda-files (list org-directory))
+;; (setq org-agenda-custom-commands
+;;       '(("c" "Simple agenda view"
+;;          ((tags "PRIORITY=\"A\""
+;;                 ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+;;                  (org-agenda-overriding-header "High-priority unfinished tasks:")))
+;;           (agenda "")
+;;           (alltodo ""
+;;                    ((org-agenda-skip-function
+;;                      '(or (air-org-skip-subtree-if-priority ?A)
+;;                           (org-agenda-skip-if nil '(scheduled deadline))))))))
+;;           ("h" "Home tasks" tags-todo "HOME"
+;;             ((org-agenda-overriding-header "Home Tasks")))
+;;         ("s" "School tasks" tags-todo "SCHOOL"
+;;          ((org-agenda-overriding-header "School Tasks")))
+;;         ("H" "Habits" tags-todo "STYLE=\"habit\"" ((org-agenda-overriding-header "Habits")))
+;;         ("w" "Work tasks" ((agenda "") (tags-todo "WORK"))
+;;          ((org-agenda-overriding-header "Work Tasks")
+;;           (org-agenda-tag-filter-preset "WORK")))))
+;; (setq org-pretty-entities 't)
+(setq org-tags-column 50)
 (setq org-ellipsis " ▼ ")
 (setq org-fontify-done-headline t)
 (custom-set-faces
@@ -24,7 +80,9 @@
  '(org-headline-done
    ((((class color) (min-colors 16) (background dark))
      (:strike-through t)))))
-(setq org-tags-column 50)
+(setq org-refile-use-outline-path 'file)
+(setq org-outline-path-complete-in-steps nil)
+(setq org-refile-allow-creating-parent-nodes 'confirm)
 (setq org-refile-targets
       '(("tickler.org" :maxlevel . 1)
         ("someday.org" :maxlevel . 1)
@@ -94,10 +152,7 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
          ((org-agenda-overriding-header "Work Tasks")
           (org-agenda-tag-filter-preset "WORK")))))
 (setq org-pretty-entities 't)
-(setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
-(setq org-refile-use-outline-path 'file)
-(setq org-outline-path-complete-in-steps nil)
-(setq org-refile-allow-creating-parent-nodes 'confirm)
+(add-to-list 'org-modules 'org-habit t)
 (setq org-roam-directory "~/Dropbox/notes")
 (setq org-roam-index-file "~/Dropbox/notes/index.org")
 ;; (add-hook 'after-init-hook 'org-roam-mode)
@@ -326,6 +381,47 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
                         ("unpublished" . "${author}, *${title}* (${year}). Unpublished manuscript.")
                         ("misc" . "${author} (${year}). *${title}*. Retrieved from [${howpublished}](${howpublished}). ${note}.")
                         (nil . "${author}, *${title}* (${year})."))))))
+(after! (org org-roam)
+  (defun jethro/org-roam-export-all ()
+    "Re-exports all Org-roam files to Hugo markdown."
+    (interactive)
+    (dolist (f (org-roam--list-all-files))
+      (with-current-buffer (find-file f)
+        (when (s-contains? "SETUPFILE" (buffer-string))
+          (org-hugo-export-wim-to-md)))))
+  (defun jethro/org-roam--backlinks-list (file)
+    (when (org-roam--org-roam-file-p file)
+      (mapcar #'car (org-roam-db-query [:select :distinct [from]
+                                        :from links
+                                        :where (= to $s1)
+                                        :and from :not :like $s2] file "%private%"))))
+  (defun alex/add-org-roam-backlinks ()
+    (interactive)
+    (when-let ((links (jethro/org-roam--backlinks-list (buffer-file-name))))
+      (insert "\n** Backlinks\n")
+      (dolist (link links)
+        (insert (format "- [[file:%s][%s]]\n"
+                        (file-relative-name link org-roam-directory)
+                        (org-roam--get-title-or-slug link))))))
+  (defun jethro/org-export-preprocessor (_backend)
+    (when-let ((links (jethro/org-roam--backlinks-list (buffer-file-name))))
+      (end-of-buffer)
+      (insert "\n{{< rawhtml >}}</div><div class='backlinks box'>{{< /rawhtml >}}\n")
+      (insert "* Links to this page\n")
+      (dolist (link links)
+        (insert (format "[[file:%s][%s]]\n"
+                        (file-relative-name link org-roam-directory)
+                        (org-roam--get-title-or-slug link))))
+      (insert "{{< rawhtml >}}</div>{{< /rawhtml >}}")))
+  (add-hook 'org-export-before-processing-hook #'jethro/org-export-preprocessor))
+
+(after! (org ox-hugo)
+  (defun jethro/conditional-hugo-enable ()
+    (save-excursion
+      (if (cdr (assoc "SETUPFILE" (org-roam--extract-global-props '("SETUPFILE"))))
+          (org-hugo-auto-export-mode +1)
+        (org-hugo-auto-export-mode -1))))
+  (add-hook 'org-mode-hook #'jethro/conditional-hugo-enable))
 (require 'org-download)
 (setq-default org-download-image-dir "~/Dropbox/notes/images")
 (setq-default org-download-heading-lvl nil)
@@ -393,3 +489,7 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
     "j" 'evil-next-visual-line
     "k" 'evil-previous-visual-line))
 (define-key org-noter-doc-mode-map (kbd "i") 'org-noter-insert-note)
+;; (define-key org-super-agenda-header-map (kbd "j") 'org-agenda-next-line)
+;; (define-key org-super-agenda-header-map (kbd "k") 'org-agenda-previous-line)
+;; (define-key org-super-agenda-header-map (kbd "l") 'evil-forward-char)
+;; (define-key org-super-agenda-header-map (kbd "h") 'evil-backwards-char)

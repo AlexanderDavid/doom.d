@@ -79,6 +79,79 @@ Setup org protocol
 #+BEGIN_SRC emacs-lisp
 (require 'org-protocol)
 #+END_SRC
+Set up the default todo states
+#+BEGIN_SRC emacs-lisp
+(setq org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "DOING(D)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+#+END_SRC
+Log the change and creation of states
+#+BEGIN_SRC emacs-lisp
+(setq org-treat-insert-todo-heading-as-state-change t)
+(setq org-log-into-drawer t)
+#+END_SRC
+*** Org Agenda
+#+BEGIN_SRC emacs-lisp
+(setq org-super-agenda-date-format "%A, %e %b")
+(setq org-super-agenda-groups
+        '((:name "Habits"
+            :habit t)
+        (:name "Overdue"
+            :deadline past
+            :habit nil)
+        (:name "Scheduled"
+            :time-grid t
+            :habit nil)
+        (:name "Today"
+            :scheduled today
+            :deadline nil
+            :habit nil)
+        (:name "Due Today"
+            :deadline today)
+        (:name "Upcoming"
+            :deadline future
+            :scheduled future)))
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+;; (defun air-org-skip-subtree-if-priority (priority)
+;;   "Skip an agenda subtree if it has a priority of PRIORITY.
+
+;; PRIORITY may be one of the characters ?A, ?B, or ?C."
+;;   (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+;;         (pri-value (* 1000 (- org-lowest-priority priority)))
+;;         (pri-current (org-get-priority (thing-at-point 'line t))))
+;;     (if (= pri-value pri-current)
+;;         subtree-end
+;;       nil)))
+
+;; (setq org-agenda-use-time-grid nil)
+;; (setq org-agenda-files (list org-directory))
+;; (setq org-agenda-custom-commands
+;;       '(("c" "Simple agenda view"
+;;          ((tags "PRIORITY=\"A\""
+;;                 ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+;;                  (org-agenda-overriding-header "High-priority unfinished tasks:")))
+;;           (agenda "")
+;;           (alltodo ""
+;;                    ((org-agenda-skip-function
+;;                      '(or (air-org-skip-subtree-if-priority ?A)
+;;                           (org-agenda-skip-if nil '(scheduled deadline))))))))
+;;           ("h" "Home tasks" tags-todo "HOME"
+;;             ((org-agenda-overriding-header "Home Tasks")))
+;;         ("s" "School tasks" tags-todo "SCHOOL"
+;;          ((org-agenda-overriding-header "School Tasks")))
+;;         ("H" "Habits" tags-todo "STYLE=\"habit\"" ((org-agenda-overriding-header "Habits")))
+;;         ("w" "Work tasks" ((agenda "") (tags-todo "WORK"))
+;;          ((org-agenda-overriding-header "Work Tasks")
+;;           (org-agenda-tag-filter-preset "WORK")))))
+#+END_SRC
+*** Org Appearance
+Make org respect some \LaTeX like symbols
+#+BEGIN_SRC emacs-lisp
+;; (setq org-pretty-entities 't)
+#+END_SRC
+Set the org tags to the right
+#+BEGIN_SRC emacs-lisp
+(setq org-tags-column 50)
+#+END_SRC
 Set the default ellipsis char
 #+BEGIN_SRC emacs-lisp
 (setq org-ellipsis " ▼ ")
@@ -94,9 +167,12 @@ Strike through done tasks
    ((((class color) (min-colors 16) (background dark))
      (:strike-through t)))))
 #+END_SRC
-Set the org tags to the right
+*** Org Refile
+Make org refile more aware of the structure of org files
 #+BEGIN_SRC emacs-lisp
-(setq org-tags-column 50)
+(setq org-refile-use-outline-path 'file)
+(setq org-outline-path-complete-in-steps nil)
+(setq org-refile-allow-creating-parent-nodes 'confirm)
 #+END_SRC
 Only refile to the important files. Not to my calendar files.
 #+BEGIN_SRC emacs-lisp
@@ -105,6 +181,7 @@ Only refile to the important files. Not to my calendar files.
         ("someday.org" :maxlevel . 1)
         ("projects.org" :maxlevel . 3)))
 #+END_SRC
+*** Org Capture
 Modify default capture templates
 #+BEGIN_SRC emacs-lisp
 (require 'org-mu4e)
@@ -188,12 +265,12 @@ Make org respect some \LaTeX like symbols
 (setq org-pretty-entities 't)
 #+END_SRC
 Make org refile more aware of all org files
+*** Org Habits
+Activate the org-habit module
 #+BEGIN_SRC emacs-lisp
-(setq org-refile-targets '((org-agenda-files :maxlevel . 3)))
-(setq org-refile-use-outline-path 'file)
-(setq org-outline-path-complete-in-steps nil)
-(setq org-refile-allow-creating-parent-nodes 'confirm)
+(add-to-list 'org-modules 'org-habit t)
 #+END_SRC
+
 ** Org Roam
 #+BEGIN_SRC emacs-lisp
 (setq org-roam-directory "~/Dropbox/notes")
@@ -222,6 +299,8 @@ Make citation links red in the graph
 #+END_SRC
 ** Org-Roam-Bibtex
 #+BEGIN_SRC emacs-lisp
+(setq bibtex-completion-library-path '("~/Dropbox/notes/papers"))
+
  (use-package org-roam-bibtex
   :after (org-roam)
   :hook (org-roam-mode . org-roam-bibtex-mode)
@@ -443,7 +522,6 @@ Set the notes as the default helm bibtex action
 #+END_SRC
 ** Org ref ox hugo
 #+BEGIN_SRC emacs-lisp
-
 (after! org
   (after! org-ref
     (after! ox-hugo
@@ -460,6 +538,49 @@ Set the notes as the default helm bibtex action
                         ("misc" . "${author} (${year}). *${title}*. Retrieved from [${howpublished}](${howpublished}). ${note}.")
                         (nil . "${author}, *${title}* (${year})."))))))
 
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+(after! (org org-roam)
+  (defun jethro/org-roam-export-all ()
+    "Re-exports all Org-roam files to Hugo markdown."
+    (interactive)
+    (dolist (f (org-roam--list-all-files))
+      (with-current-buffer (find-file f)
+        (when (s-contains? "SETUPFILE" (buffer-string))
+          (org-hugo-export-wim-to-md)))))
+  (defun jethro/org-roam--backlinks-list (file)
+    (when (org-roam--org-roam-file-p file)
+      (mapcar #'car (org-roam-db-query [:select :distinct [from]
+                                        :from links
+                                        :where (= to $s1)
+                                        :and from :not :like $s2] file "%private%"))))
+  (defun alex/add-org-roam-backlinks ()
+    (interactive)
+    (when-let ((links (jethro/org-roam--backlinks-list (buffer-file-name))))
+      (insert "\n** Backlinks\n")
+      (dolist (link links)
+        (insert (format "- [[file:%s][%s]]\n"
+                        (file-relative-name link org-roam-directory)
+                        (org-roam--get-title-or-slug link))))))
+  (defun jethro/org-export-preprocessor (_backend)
+    (when-let ((links (jethro/org-roam--backlinks-list (buffer-file-name))))
+      (end-of-buffer)
+      (insert "\n{{< rawhtml >}}</div><div class='backlinks box'>{{< /rawhtml >}}\n")
+      (insert "* Links to this page\n")
+      (dolist (link links)
+        (insert (format "[[file:%s][%s]]\n"
+                        (file-relative-name link org-roam-directory)
+                        (org-roam--get-title-or-slug link))))
+      (insert "{{< rawhtml >}}</div>{{< /rawhtml >}}")))
+  (add-hook 'org-export-before-processing-hook #'jethro/org-export-preprocessor))
+
+(after! (org ox-hugo)
+  (defun jethro/conditional-hugo-enable ()
+    (save-excursion
+      (if (cdr (assoc "SETUPFILE" (org-roam--extract-global-props '("SETUPFILE"))))
+          (org-hugo-auto-export-mode +1)
+        (org-hugo-auto-export-mode -1))))
+  (add-hook 'org-mode-hook #'jethro/conditional-hugo-enable))
 #+END_SRC
 ** Org-Download
 #+BEGIN_SRC emacs-lisp
@@ -584,4 +705,12 @@ Add easy shortcuts for replacing normally and with regular expressions
 ** Noter default keys
 #+BEGIN_SRC emacs-lisp
 (define-key org-noter-doc-mode-map (kbd "i") 'org-noter-insert-note)
+#+END_SRC
+
+** Org super agenda
+#+BEGIN_SRC emacs-lisp
+;; (define-key org-super-agenda-header-map (kbd "j") 'org-agenda-next-line)
+;; (define-key org-super-agenda-header-map (kbd "k") 'org-agenda-previous-line)
+;; (define-key org-super-agenda-header-map (kbd "l") 'evil-forward-char)
+;; (define-key org-super-agenda-header-map (kbd "h") 'evil-backwards-char)
 #+END_SRC

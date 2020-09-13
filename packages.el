@@ -57,6 +57,9 @@
   :recipe (:host github :repo "AlexanderDavid/python-docstring"
            :files ("python-docstring.el")))
 
+(package! org-habit-plus
+  :recipe (:host github :repo "oddious/org-habit-plus"))
+
 (package! hugo
   :recipe (:host github :repo "aaronbieber/hugo.el"
            :files ("hugo.el")))
@@ -70,3 +73,4 @@
 (package! cdlatex)
 (package! org-download)
 (package! org-fragtog)
+(package! org-super-agenda)
