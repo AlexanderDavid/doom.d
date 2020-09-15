@@ -71,6 +71,10 @@ Set the default org directory
 #+BEGIN_SRC emacs-lisp
 (setq org-directory "~/Dropbox/gtd/")
 #+END_SRC
+Set up fragment toggling
+#+BEGIN_SRC emacs-lisp
+(add-hook 'org-mode-hook 'org-fragtog-mode)
+#+END_SRC
 Setup org protocol
 #+BEGIN_SRC emacs-lisp
 (require 'org-protocol)
@@ -141,7 +145,7 @@ Don't display templates unless in certain modes
 #+END_SRC
 Set up the default todo states
 #+BEGIN_SRC emacs-lisp
-(setq org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+(setq org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "CURRENT(c)" "WAITING(w)" "|" "DONE(d)" "KILL(k)")))
 #+END_SRC
 
 Set agenda defaults
@@ -157,7 +161,9 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
         subtree-end
       nil)))
 
-(setq org-agenda-use-time-grid nil)
+(setq org-agenda-use-time-grid t)
+(setq org-agenda-start-on-weekday 1)
+(setq org-agenda-span 7)
 (setq org-agenda-files (list org-directory))
 (setq org-agenda-custom-commands
       '(("c" "Simple agenda view"
@@ -192,7 +198,7 @@ Make org refile more aware of all org files
 #+BEGIN_SRC emacs-lisp
 (setq org-roam-directory "~/Dropbox/notes")
 (setq org-roam-index-file "~/Dropbox/notes/index.org")
-(add-hook 'after-init-hook 'org-roam-mode)
+;; (add-hook 'after-init-hook 'org-roam-mode)
 (setq org-roam-graph-viewer "/usr/bin/brave")
 (require 'org-roam-protocol)
 
@@ -359,7 +365,7 @@ Make citation links red in the graph
 (setq mu4e-sent-messages-behavior 'delete)
 
 ;; allow for updating mail using 'U' in the main view:
-(setq mu4e-get-mail-command "mbsync -a")
+(setq mu4e-get-mail-command "mbsync -c $HOME/.config/isync/mbsyncrc -a")
 
 ;; Download attachments to the correct directory
 (setq mu4e-attachment-dir "~/dl")

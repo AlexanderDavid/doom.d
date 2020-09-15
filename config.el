@@ -60,7 +60,7 @@
       '(("e" ((in-mode . "mu4e-view-mode")
 	      (in-mode . "mu4e-message-mode")
           (in-mode . "mu4e-headers-mode")))))
-(setq org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+(setq org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "CURRENT(c)" "WAITING(w)" "|" "DONE(d)" "KILL(k)")))
 (defun air-org-skip-subtree-if-priority (priority)
   "Skip an agenda subtree if it has a priority of PRIORITY.
 
@@ -72,7 +72,9 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
         subtree-end
       nil)))
 
-(setq org-agenda-use-time-grid nil)
+(setq org-agenda-use-time-grid t)
+(setq org-agenda-start-on-weekday 1)
+(setq org-agenda-span 7)
 (setq org-agenda-files (list org-directory))
 (setq org-agenda-custom-commands
       '(("c" "Simple agenda view"
@@ -98,7 +100,7 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
 (setq org-refile-allow-creating-parent-nodes 'confirm)
 (setq org-roam-directory "~/Dropbox/notes")
 (setq org-roam-index-file "~/Dropbox/notes/index.org")
-(add-hook 'after-init-hook 'org-roam-mode)
+;; (add-hook 'after-init-hook 'org-roam-mode)
 (setq org-roam-graph-viewer "/usr/bin/brave")
 (require 'org-roam-protocol)
 
@@ -243,7 +245,7 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
 (setq mu4e-sent-messages-behavior 'delete)
 
 ;; allow for updating mail using 'U' in the main view:
-(setq mu4e-get-mail-command "mbsync -a")
+(setq mu4e-get-mail-command "mbsync -c $HOME/.config/isync/mbsyncrc -a")
 
 ;; Download attachments to the correct directory
 (setq mu4e-attachment-dir "~/dl")
