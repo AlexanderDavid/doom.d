@@ -69,3 +69,4 @@
 (package! ox-hugo)
 (package! cdlatex)
 (package! org-download)
+(package! org-fragtog)
