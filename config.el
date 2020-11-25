@@ -13,7 +13,7 @@
 (setq jedi:complete-on-dot t)
 (add-hook! 'image-mode-hook 'eimp-mode)
 (auto-image-file-mode 1)
-(setq org-directory "~/Dropbox/gtd/")
+(setq org-directory "~/doc/org/gtd/")
 (add-hook 'org-mode-hook 'org-fragtog-mode)
 (require 'org-protocol)
 (setq org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "DOING(D)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
@@ -89,28 +89,28 @@
         ("projects.org" :maxlevel . 3)))
 (require 'org-mu4e)
 (setq org-capture-templates
-      '(("t" "Todo" entry (file+headline "~/Dropbox/gtd/inbox.org" "Inbox")
+      '(("t" "Todo" entry (file+headline "~/doc/org/gtd/inbox.org" "Inbox")
          "* TODO %?\n  %i\n%t\n%a")
 
-        ("d" "Review: Daily Review" entry (file+datetree "~/Dropbox/gtd/reviews.org") (file "~/Dropbox/gtd/templates/dailyreviewtemplate.org"))
+        ("d" "Review: Daily Review" entry (file+datetree "~/doc/org/gtd/reviews.org") (file "~/doc/org/gtd/templates/dailyreviewtemplate.org"))
 
-        ("T" "Tickler" entry (file+headline "~/Dropbox/gtd/tickler.org" "Tickler")
+        ("T" "Tickler" entry (file+headline "~/doc/org/gtd/tickler.org" "Tickler")
          "* TODO %?\n  %i\n%t\n%a")
 
-        ("z" "Website Capture" entry (file+headline "~/Dropbox/gtd/inbox.org" "Inbox")
-        "* TODO %:annotation\n %:initial\n %u\n\n\n%?")
+        ("z" "Website Capture" entry (file+headline "~/doc/org/gtd/inbox.org" "Inbox")
+         "* TODO %:annotation\n %:initial\n %u\n\n\n%?")
 
-        ("e" "Email" entry (file+headline "~/Dropbox/gtd/inbox.org" "Inbox")
-            "* TODO [#A] Reply: %a %(create-mail-tag)\n%:date-timestamp"
-            :immediate-finish t)))
+        ("e" "Email" entry (file+headline "~/doc/org/gtd/inbox.org" "Inbox")
+         "* TODO [#A] Reply: %a %(create-mail-tag)\n%:date-timestamp"
+         :immediate-finish t)))
 
 (defun create-mail-tag ()
   (let ((to (plist-get org-store-link-plist :to)))
     (if (equal to "'Alex Day' <alexday135@gmail.com>")
         ":@home:"
-        ":@school:")))
+      ":@school:")))
 
-    ;; (format "%s" to)))
+;; (format "%s" to)))
 ;; (setq org-capture-templates-contexts
 ;;       '(("e" (in-mode . "mu4e-headers-mode"))))
         ;; ("e" (in-mode . "mu4e-view-mode"))))
@@ -153,29 +153,32 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
           (org-agenda-tag-filter-preset "WORK")))))
 (setq org-pretty-entities 't)
 (add-to-list 'org-modules 'org-habit t)
-(setq org-roam-directory "~/Dropbox/notes")
-(setq org-roam-index-file "~/Dropbox/notes/index.org")
-;; (add-hook 'after-init-hook 'org-roam-mode)
-(setq org-roam-graph-viewer "/usr/bin/brave")
 (require 'org-roam-protocol)
 
 (after! org-roam
-      (setq org-roam-ref-capture-templates
-            '(("r" "ref" plain (function org-roam-capture--get-point)
-               "%?"
-               :file-name "${slug}"
-               :head "#+TITLE: ${title}
+  (setq org-roam-directory "~/doc/org/notes")
+  (setq org-roam-index-file "~/doc/org/notes/index.org")
+  ;; (add-hook 'after-init-hook 'org-roam-mode)
+  (setq org-roam-graph-viewer "/usr/bin/brave")
+  (setq org-roam-ref-capture-templates
+        '(("r" "ref" plain (function org-roam-capture--get-point)
+           "%?"
+           :file-name "${slug}"
+           :head "#+TITLE: ${title}
     #+ROAM_KEY: ${ref}
     - source :: ${ref}"
-               :unnarrowed t))))
+           :unnarrowed t))))
 (setq org-roam-graph-edge-cites-extra-config '(("color" . "red")))
-(setq org-ref-default-bibliography '("~/Dropbox/notes/papers/references.bib"))
- (use-package org-roam-bibtex
+(setq org-ref-default-bibliography '("~/doc/org/notes/papers/references.bib"))
+(setq org-ref-get-pdf-filename-function #'org-ref-get-pdf-filename-helm-bibtex)
+(setq bibtex-completion-library-path '("~/doc/org/notes/papers"))
+
+(use-package org-roam-bibtex
   :after (org-roam)
   :hook (org-roam-mode . org-roam-bibtex-mode)
   :config
   (setq org-roam-bibtex-preformat-keywords
-   '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
+        '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
   (setq orb-templates
         '(("r" "ref" plain (function org-roam-capture--get-point)
            ""
@@ -199,154 +202,156 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
    ;; I want to see the whole file
    org-noter-hide-other nil
    ;; Everything is relative to the main notes file
-   org-noter-notes-search-path '("~/Dropbox/notes")
+   org-noter-notes-search-path '("~/doc/org/notes")
    )
   )
 (use-package ox-hugo
   :ensure t            ;Auto-install the package from Melpa (optional)
   :after ox)
 (setq deft-extensions '("org"))
-(setq deft-directory "~/Dropbox/notes")
+(setq deft-directory "~/doc/org/notes")
 (setq deft-recursive t)
 (after! mu4e
-;; use mu4e for e-mail in emacs
-(setq mail-user-agent 'mu4e-user-agent)
-(setq mu4e-maildir "/home/alex/.local/share/mail")
+  ;; use mu4e for e-mail in emacs
+  (setq mail-user-agent 'mu4e-user-agent)
+  (setq mu4e-maildir "/home/alex/.local/share/mail")
 
-;; default
-(setq mu4e-contexts
-    `( ,(make-mu4e-context
-        :name "clemson"
-        :enter-func (lambda ()
-                      (mu4e-message "Entering Clemson context")
-                      (setq mu4e-maildir-shortcuts  '( ("/clemson/INBOX"               . ?i)
-                                                       ("/clemson/sent"   . ?s)
-                                                       ("/clemson/trash"       . ?t)
-                                                       ("/clemson/archive"             . ?r)))
-                    )
-        :leave-func (lambda () (mu4e-message "Leaving Clemson context"))
-        :match-func (lambda (msg)
-        (when msg
-            (or (mu4e-message-contact-field-matches msg
-                :to "adday@clemson.edu")
-                (mu4e-message-contact-field-matches msg
-                :to "adday@g.clemson.edu"))))
-        :vars '( ( user-mail-address     . "adday@clemson.edu"  )
-                ( user-full-name         . "Alex Day" )
-                ( mu4e-drafts-folder     . "/clemson/drafts")
-                ( mu4e-sent-folder       . "/clemson/sent")
-                ( mu4e-trash-folder      . "/clemson/trash")
-                ( mu4e-refile-folder     . "/clemson/archive" )
-                ( mu4e-compose-signature .
-                    (concat
-                    "Alex Day"))))
-       ,(make-mu4e-context
-        :name "gmail"
-        :enter-func (lambda ()
-                      (mu4e-message "Entering Gmail context")
-                      (setq mu4e-maildir-shortcuts  '( ("/gmail/INBOX"               . ?i)
-                                                       ("/gmail/sent"   . ?s)
-                                                       ("/gmail/trash"       . ?t)
-                                                       ("/gmail/archive"             . ?r)))
-                    )
-        :leave-func (lambda () (mu4e-message "Leaving Gmail context"))
-        :match-func (lambda (msg)
-                        (when msg
-                                (or (mu4e-message-contact-field-matches msg
-                                        :to "alexday135@gmail.com")
-                                    (mu4e-message-contact-field-matches msg
-                                        :to "A.D.Day@eagle.clarion.edu"))))
-        :vars '( ( user-mail-address     . "alexday135@gmail.com"  )
-                ( user-full-name         . "Alex Day" )
-                ( mu4e-drafts-folder     . "/gmail/drafts")
-                ( mu4e-sent-folder       . "/gmail/sent")
-                ( mu4e-trash-folder      . "/gmail/trash")
-                ( mu4e-refile-folder     . "/gmail/archive" )
-                ( mu4e-compose-signature .
-                    (concat
-                    "Alex Day"))))))
-
-
-;; Add bookmarks
-(setq mu4e-bookmarks
-  `( ,(make-mu4e-bookmark
-       :name "Messages in inbox"
-       :query "maildir:\"/clemson/INBOX\" OR maildir:\"/gmail/INBOX\""
-       :key ?i)
-     ,(make-mu4e-bookmark
-       :name  "Unread messages"
-       :query "flag:unread AND NOT flag:trashed"
-       :key ?u)
-     ,(make-mu4e-bookmark
-       :name "Today's messages"
-       :query "date:today..now"
-       :key ?t)
-     ,(make-mu4e-bookmark
-       :name "Last 7 days"
-       :query "date:7d..now"
-       :key ?w)))
-;; set `mu4e-context-policy` and `mu4e-compose-policy` to tweak when mu4e should
-;; guess or ask the correct context, e.g.
-
-;; start with the first (default) context;
-;; default is to ask-if-none (ask when there's no context yet, and none match)
-;; (setq mu4e-context-policy 'pick-first)
-
-;; compose with the current context is no context matches;
-;; default is to ask
-;; (setq mu4e-compose-context-policy nil)
-
-;; don't save message to Sent Messages, Gmail/IMAP takes care of this
-(setq mu4e-sent-messages-behavior 'delete)
-
-;; allow for updating mail using 'U' in the main view:
-(setq mu4e-get-mail-command "mbsync -c $HOME/.config/isync/mbsyncrc -a")
-
-;; Download attachments to the correct directory
-(setq mu4e-attachment-dir "~/dl")
-
-;; Sometimes html email is just not readable in a text based client, this lets me open the
-;; email in my browser.
-(add-to-list 'mu4e-view-actions '("View in browser" . mu4e-action-view-in-browser) t)
-
-;; sending mail -- replace USERNAME with your gmail username
-;; also, make sure the gnutls command line utils are installed
-;; package 'gnutls-bin' in Debian/Ubuntu
+  ;; default
+  (setq mu4e-contexts
+        `( ,(make-mu4e-context
+             :name "clemson"
+             :enter-func (lambda ()
+                           (mu4e-message "Entering Clemson context")
+                           (setq mu4e-maildir-shortcuts  '( ("/clemson/INBOX"               . ?i)
+                                                            ("/clemson/sent"   . ?s)
+                                                            ("/clemson/trash"       . ?t)
+                                                            ("/clemson/archive"             . ?r)))
+                           )
+             :leave-func (lambda () (mu4e-message "Leaving Clemson context"))
+             :match-func (lambda (msg)
+                           (when msg
+                             (or (mu4e-message-contact-field-matches msg
+                                                                     :to "adday@clemson.edu")
+                                 (mu4e-message-contact-field-matches msg
+                                                                     :to "adday@g.clemson.edu"))))
+             :vars '( ( user-mail-address      . "adday@clemson.edu"  )
+                      ( user-full-name         . "Alex Day" )
+                      ( mu4e-drafts-folder     . "/clemson/drafts")
+                      ( mu4e-sent-folder       . "/clemson/sent")
+                      ( mu4e-trash-folder      . "/clemson/trash")
+                      ( mu4e-maildir           . "/home/alex/.local/share/mail/clemson")
+                      ( mu4e-refile-folder     . "/clemson/archive" )
+                      ( mu4e-compose-signature .
+                                               (concat
+                                                "Alex Day\nPhD Student\nSchool of Computing\nClemson University"))))
+           ,(make-mu4e-context
+             :name "gmail"
+             :enter-func (lambda ()
+                           (mu4e-message "Entering Gmail context")
+                           (setq mu4e-maildir-shortcuts  '( ("/gmail/INBOX"               . ?i)
+                                                            ("/gmail/sent"   . ?s)
+                                                            ("/gmail/trash"       . ?t)
+                                                            ("/gmail/archive"             . ?r)))
+                           )
+             :leave-func (lambda () (mu4e-message "Leaving Gmail context"))
+             :match-func (lambda (msg)
+                           (when msg
+                             (or (mu4e-message-contact-field-matches msg
+                                                                     :to "alexday135@gmail.com")
+                                 (mu4e-message-contact-field-matches msg
+                                                                     :to "A.D.Day@eagle.clarion.edu"))))
+             :vars '( ( user-mail-address     . "alexday135@gmail.com"  )
+                      ( user-full-name         . "Alex Day" )
+                      ( mu4e-drafts-folder     . "/gmail/drafts")
+                      ( mu4e-sent-folder       . "/gmail/sent")
+                      ( mu4e-trash-folder      . "/gmail/trash")
+                      ( mu4e-maildir           . "/home/alex/.local/share/mail/gmail")
+                      ( mu4e-refile-folder     . "/gmail/archive" )
+                      ( mu4e-compose-signature .
+                                               (concat
+                                                "Alex Day"))))))
 
 
-(setq message-send-mail-function 'message-send-mail-with-sendmail)
-(setq sendmail-program "/usr/bin/msmtp")
-;; tell msmtp to choose the SMTP server according to the from field in the outgoing email
-(setq message-sendmail-extra-arguments '("--read-envelope-from"))
-(setq message-sendmail-f-is-evil 't)
+  ;; Add bookmarks
+  (setq mu4e-bookmarks
+        `( ,(make-mu4e-bookmark
+             :name "Messages in inbox"
+             :query "maildir:\"/clemson/INBOX\" OR maildir:\"/gmail/INBOX\""
+             :key ?i)
+           ,(make-mu4e-bookmark
+             :name  "Unread messages"
+             :query "flag:unread AND NOT flag:trashed"
+             :key ?u)
+           ,(make-mu4e-bookmark
+             :name "Today's messages"
+             :query "date:today..now"
+             :key ?t)
+           ,(make-mu4e-bookmark
+             :name "Last 7 days"
+             :query "date:7d..now"
+             :key ?w)))
+  ;; set `mu4e-context-policy` and `mu4e-compose-policy` to tweak when mu4e should
+  ;; guess or ask the correct context, e.g.
 
-;; don't keep message buffers around
-(setq message-kill-buffer-on-exit t)
+  ;; start with the first (default) context;
+  ;; default is to ask-if-none (ask when there's no context yet, and none match)
+  ;; (setq mu4e-context-policy 'pick-first)
 
-;; Store link to message if in header view, not to header query
-(setq org-mu4e-link-query-in-headers-mode nil))
+  ;; compose with the current context is no context matches;
+  ;; default is to ask
+  ;; (setq mu4e-compose-context-policy nil)
+
+  ;; don't save message to Sent Messages, Gmail/IMAP takes care of this
+  (setq mu4e-sent-messages-behavior 'delete)
+
+  ;; allow for updating mail using 'U' in the main view:
+  (setq mu4e-get-mail-command "mbsync -c $HOME/.config/isync/mbsyncrc -a")
+
+  ;; Download attachments to the correct directory
+  (setq mu4e-attachment-dir "~/dl")
+
+  ;; Sometimes html email is just not readable in a text based client, this lets me open the
+  ;; email in my browser.
+  (add-to-list 'mu4e-view-actions '("View in browser" . mu4e-action-view-in-browser) t)
+
+  ;; sending mail -- replace USERNAME with your gmail username
+  ;; also, make sure the gnutls command line utils are installed
+  ;; package 'gnutls-bin' in Debian/Ubuntu
+
+
+  (setq message-send-mail-function 'message-send-mail-with-sendmail)
+  (setq sendmail-program "/usr/bin/msmtp")
+  ;; tell msmtp to choose the SMTP server according to the from field in the outgoing email
+  (setq message-sendmail-extra-arguments '("--read-envelope-from"))
+  (setq message-sendmail-f-is-evil 't)
+
+  ;; don't keep message buffers around
+  (setq message-kill-buffer-on-exit t)
+
+  ;; Store link to message if in header view, not to header query
+  (setq org-mu4e-link-query-in-headers-mode nil))
  (setq
- bibtex-completion-notes-path "~/Dropbox/notes"
- bibtex-completion-bibliography "~/Dropbox/notes/papers/references.bib"
- bibtex-completion-pdf-field "file"
- bibtex-completion-library-path '("~/Dropbox/notes/papers")
- bibtex-completion-notes-template-multiple-files
- (concat
-  "#+TITLE: ${title}\n"
-  "#+ROAM_KEY: cite:${=key=}\n\n"
-  "* TODO Notes\n"
-  ":PROPERTIES:\n"
-  ":Custom_ID: ${=key=}\n"
-  ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
-  ":AUTHOR: ${author-abbrev}\n"
-  ":JOURNAL: ${journaltitle}\n"
-  ":DATE: ${date}\n"
-  ":YEAR: ${year}\n"
-  ":DOI: ${doi}\n"
-  ":URL: ${url}\n"
-  ":END:\n\n"
+  bibtex-completion-notes-path "~/doc/org/notes"
+  bibtex-completion-bibliography "~/doc/org/notes/papers/references.bib"
+  bibtex-completion-pdf-field "file"
+  bibtex-completion-library-path '("~/doc/org/notes/papers")
+  bibtex-completion-notes-template-multiple-files
+  (concat
+   "#+TITLE: ${title}\n"
+   "#+ROAM_KEY: cite:${=key=}\n\n"
+   "* TODO Notes\n"
+   ":PROPERTIES:\n"
+   ":Custom_ID: ${=key=}\n"
+   ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
+   ":AUTHOR: ${author-abbrev}\n"
+   ":JOURNAL: ${journaltitle}\n"
+   ":DATE: ${date}\n"
+   ":YEAR: ${year}\n"
+   ":DOI: ${doi}\n"
+   ":URL: ${url}\n"
+   ":END:\n\n"
+   )
   )
- )
 (after! helm-bibtex
     (helm-delete-action-from-source "Edit notes" helm-source-bibtex)
     (helm-add-action-to-source "Edit notes" 'helm-bibtex-edit-notes helm-source-bibtex 0))
@@ -423,7 +428,7 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
         (org-hugo-auto-export-mode -1))))
   (add-hook 'org-mode-hook #'jethro/conditional-hugo-enable))
 (require 'org-download)
-(setq-default org-download-image-dir "~/Dropbox/notes/images")
+(setq-default org-download-image-dir "~/doc/org/notes/images")
 (setq-default org-download-heading-lvl nil)
 (setq org-download-screenshot-method "maim -s -d 0.1 %s")
 (setq! +latex-viewers '(pdf-tools)
@@ -465,10 +470,10 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
         :desc "Fit to Window" "f" 'eimp-fit-image-to-window))
 (map! :leader
       (:prefix ("o")
-        :desc "Open inbox.org" "i" (lambda () (interactive) (find-file "~/Dropbox/gtd/inbox.org"))
-        :desc "Open tickler.org" "t" (lambda () (interactive) (find-file "~/Dropbox/gtd/tickler.org"))
-        :desc "Open someday.org" "s" (lambda () (interactive) (find-file "~/Dropbox/gtd/someday.org"))
-        :desc "Open projects.org" "p" (lambda () (interactive) (find-file "~/Dropbox/gtd/projects.org"))))
+       :desc "Open inbox.org" "i" (lambda () (interactive) (find-file "~/doc/org/gtd/inbox.org"))
+       :desc "Open tickler.org" "t" (lambda () (interactive) (find-file "~/doc/org/gtd/tickler.org"))
+       :desc "Open someday.org" "s" (lambda () (interactive) (find-file "~/doc/org/gtd/someday.org"))
+       :desc "Open projects.org" "p" (lambda () (interactive) (find-file "~/doc/org/gtd/projects.org"))))
 (map! :leader
       (:prefix ("o")
         :desc "Open mu4e" "m" 'mu4e))
