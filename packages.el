@@ -65,7 +65,6 @@
            :files ("hugo.el")))
 
 (package! org-ref)
-(unpin! org-roam)
 (package! company-org-roam)
 (package! org-roam-bibtex)
 (package! org-roam-server)
@@ -73,4 +72,5 @@
 (package! cdlatex)
 (package! org-download)
 (package! org-fragtog)
-(package! org-super-agenda)
+
+(package! imenu-list)

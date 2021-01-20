@@ -1,7 +1,7 @@
 ;;; Config.el --- -*- lexical-binding: t -*-
 ;;; Author: Alex Day
 (setq! user-full-name "Alex Day"
-       user-mail-address "alexday135@gmail")
+       user-mail-address "alexday135@gmail.com")
 (setq! doom-font "JetBrainsMono Nerd Font Mono-13"
        doom-unicode-font "JoyPixels-14")
 (setq custom-safe-themes t)
@@ -15,6 +15,7 @@
 (auto-image-file-mode 1)
 (setq org-directory "~/doc/org/gtd/")
 (add-hook 'org-mode-hook 'org-fragtog-mode)
+(add-hook 'org-mode-hook 'org-cdlatex-mode)
 (require 'org-protocol)
 (setq org-todo-keywords '((sequence "TODO(t)" "NEXT(n)" "DOING(D)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
 (setq org-treat-insert-todo-heading-as-state-change t)
@@ -69,7 +70,7 @@
 ;;         ("w" "Work tasks" ((agenda "") (tags-todo "WORK"))
 ;;          ((org-agenda-overriding-header "Work Tasks")
 ;;           (org-agenda-tag-filter-preset "WORK")))))
-;; (setq org-pretty-entities 't)
+(setq org-pretty-entities 't)
 (setq org-tags-column 50)
 (setq org-ellipsis " ▼ ")
 (setq org-fontify-done-headline t)
@@ -159,7 +160,7 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
   (setq org-roam-directory "~/doc/org/notes")
   (setq org-roam-index-file "~/doc/org/notes/index.org")
   ;; (add-hook 'after-init-hook 'org-roam-mode)
-  (setq org-roam-graph-viewer "/usr/bin/brave")
+  (setq org-roam-graph-viewer "/usr/bin/firefox")
   (setq org-roam-ref-capture-templates
         '(("r" "ref" plain (function org-roam-capture--get-point)
            "%?"
@@ -212,6 +213,14 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
 (setq deft-directory "~/doc/org/notes")
 (setq deft-recursive t)
 (after! mu4e
+  ;; Open links in chrome
+  (setq browse-url-browser-function 'browse-url-generic)
+  (setq browse-url-generic-program "google-chrome-beta")
+
+  ;; "Nice" HTML translation
+  (setq mu4e-html2text-command "w3m -dump -T text/html")
+
+
   ;; use mu4e for e-mail in emacs
   (setq mail-user-agent 'mu4e-user-agent)
   (setq mu4e-maildir "/home/alex/.local/share/mail")
@@ -240,10 +249,8 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
                       ( mu4e-sent-folder       . "/clemson/sent")
                       ( mu4e-trash-folder      . "/clemson/trash")
                       ( mu4e-maildir           . "/home/alex/.local/share/mail/clemson")
-                      ( mu4e-refile-folder     . "/clemson/archive" )
-                      ( mu4e-compose-signature .
-                                               (concat
-                                                "Alex Day\nPhD Student\nSchool of Computing\nClemson University"))))
+                      ( mu4e-refile-folder     . "/clemson/archive" )))
+
            ,(make-mu4e-context
              :name "gmail"
              :enter-func (lambda ()
@@ -266,10 +273,7 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
                       ( mu4e-sent-folder       . "/gmail/sent")
                       ( mu4e-trash-folder      . "/gmail/trash")
                       ( mu4e-maildir           . "/home/alex/.local/share/mail/gmail")
-                      ( mu4e-refile-folder     . "/gmail/archive" )
-                      ( mu4e-compose-signature .
-                                               (concat
-                                                "Alex Day"))))))
+                      ( mu4e-refile-folder     . "/gmail/archive" )))))
 
 
   ;; Add bookmarks
@@ -330,6 +334,19 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
 
   ;; Store link to message if in header view, not to header query
   (setq org-mu4e-link-query-in-headers-mode nil))
+
+(require 'org-msg)
+(setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t"
+      org-msg-startup "hidestars indent inlineimages"
+      org-msg-default-alternatives '(text html)
+      org-msg-signature "
+#+begin_signature
+--
+Alex Day
+PhD Student
+School of Computing
+Clemson University
+#+end_signature")
  (setq
   bibtex-completion-notes-path "~/doc/org/notes"
   bibtex-completion-bibliography "~/doc/org/notes/papers/references.bib"
@@ -443,6 +460,9 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
   (interactive)
   (shell-command (format "python %s" (buffer-name)) "*python-output*"))
 (global-set-key [f5] 'run-python-script)
+(require 'lsp-python-ms)
+(setq lsp-python-ms-auto-install-server t)
+(add-hook 'python-mode-hook #'lsp) ; or lsp-deferred
 (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
 (map! :leader
   (:prefix ("r" . "replace")
@@ -494,6 +514,8 @@ PRIORITY may be one of the characters ?A, ?B, or ?C."
     "j" 'evil-next-visual-line
     "k" 'evil-previous-visual-line))
 (define-key org-noter-doc-mode-map (kbd "i") 'org-noter-insert-note)
+(setq imenu-list-focus-after-activation t)
+(map! :leader (:prefix ("c") :desc "imenu list" "l" 'imenu-list-smart-toggle))
 ;; (define-key org-super-agenda-header-map (kbd "j") 'org-agenda-next-line)
 ;; (define-key org-super-agenda-header-map (kbd "k") 'org-agenda-previous-line)
 ;; (define-key org-super-agenda-header-map (kbd "l") 'evil-forward-char)

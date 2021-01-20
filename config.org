@@ -5,6 +5,9 @@
 #+STARTUP: noinlineimages
 #+PROPERTY: header-args :tangle yes :cache yes :results silent :padline no
 
+* Current Problems
+** TODO Disconnect between citation links and pdfs of papers
+** TODO References in braindump
 * General
 ** File Header
 Set the default to lexical binding. Most up to date languages use this style so
@@ -17,7 +20,7 @@ it doesn't add much complexity. Read more about [[https://www.emacswiki.org/emac
 Set full name and mail address. Could also add GPG stuff
 #+BEGIN_SRC emacs-lisp
 (setq! user-full-name "Alex Day"
-       user-mail-address "alexday135@gmail")
+       user-mail-address "alexday135@gmail.com")
 #+END_SRC
 * Appearance
 ** Fonts
@@ -71,9 +74,10 @@ Set the default org directory
 #+BEGIN_SRC emacs-lisp
 (setq org-directory "~/doc/org/gtd/")
 #+END_SRC
-Set up fragment toggling
+Set up fragment toggling and nice latex shortcuts
 #+BEGIN_SRC emacs-lisp
 (add-hook 'org-mode-hook 'org-fragtog-mode)
+(add-hook 'org-mode-hook 'org-cdlatex-mode)
 #+END_SRC
 Setup org protocol
 #+BEGIN_SRC emacs-lisp
@@ -146,7 +150,7 @@ Log the change and creation of states
 *** Org Appearance
 Make org respect some \LaTeX like symbols
 #+BEGIN_SRC emacs-lisp
-;; (setq org-pretty-entities 't)
+(setq org-pretty-entities 't)
 #+END_SRC
 Set the org tags to the right
 #+BEGIN_SRC emacs-lisp
@@ -278,7 +282,7 @@ Activate the org-habit module
   (setq org-roam-directory "~/doc/org/notes")
   (setq org-roam-index-file "~/doc/org/notes/index.org")
   ;; (add-hook 'after-init-hook 'org-roam-mode)
-  (setq org-roam-graph-viewer "/usr/bin/brave")
+  (setq org-roam-graph-viewer "/usr/bin/firefox")
   (setq org-roam-ref-capture-templates
         '(("r" "ref" plain (function org-roam-capture--get-point)
            "%?"
@@ -352,6 +356,14 @@ Make citation links red in the graph
 ** mu4e
 #+BEGIN_SRC emacs-lisp
 (after! mu4e
+  ;; Open links in chrome
+  (setq browse-url-browser-function 'browse-url-generic)
+  (setq browse-url-generic-program "google-chrome-beta")
+
+  ;; "Nice" HTML translation
+  (setq mu4e-html2text-command "w3m -dump -T text/html")
+
+
   ;; use mu4e for e-mail in emacs
   (setq mail-user-agent 'mu4e-user-agent)
   (setq mu4e-maildir "/home/alex/.local/share/mail")
@@ -380,10 +392,8 @@ Make citation links red in the graph
                       ( mu4e-sent-folder       . "/clemson/sent")
                       ( mu4e-trash-folder      . "/clemson/trash")
                       ( mu4e-maildir           . "/home/alex/.local/share/mail/clemson")
-                      ( mu4e-refile-folder     . "/clemson/archive" )
-                      ( mu4e-compose-signature .
-                                               (concat
-                                                "Alex Day\nPhD Student\nSchool of Computing\nClemson University"))))
+                      ( mu4e-refile-folder     . "/clemson/archive" )))
+
            ,(make-mu4e-context
              :name "gmail"
              :enter-func (lambda ()
@@ -406,10 +416,7 @@ Make citation links red in the graph
                       ( mu4e-sent-folder       . "/gmail/sent")
                       ( mu4e-trash-folder      . "/gmail/trash")
                       ( mu4e-maildir           . "/home/alex/.local/share/mail/gmail")
-                      ( mu4e-refile-folder     . "/gmail/archive" )
-                      ( mu4e-compose-signature .
-                                               (concat
-                                                "Alex Day"))))))
+                      ( mu4e-refile-folder     . "/gmail/archive" )))))
 
 
   ;; Add bookmarks
@@ -470,6 +477,19 @@ Make citation links red in the graph
 
   ;; Store link to message if in header view, not to header query
   (setq org-mu4e-link-query-in-headers-mode nil))
+
+(require 'org-msg)
+(setq org-msg-options "html-postamble:nil H:5 num:nil ^:{} toc:nil author:nil email:nil \\n:t"
+      org-msg-startup "hidestars indent inlineimages"
+      org-msg-default-alternatives '(text html)
+      org-msg-signature "
+#+begin_signature
+--
+Alex Day
+PhD Student
+School of Computing
+Clemson University
+#+end_signature")
 #+END_SRC
 ** Helm Bibtex
 #+BEGIN_SRC emacs-lisp
@@ -623,6 +643,12 @@ Google docstrings
   (shell-command (format "python %s" (buffer-name)) "*python-output*"))
 (global-set-key [f5] 'run-python-script)
 #+END_SRC
+*** Microsoft LSP
+#+begin_src emacs-lisp
+(require 'lsp-python-ms)
+(setq lsp-python-ms-auto-install-server t)
+(add-hook 'python-mode-hook #'lsp) ; or lsp-deferred
+#+end_src
 ** C/C++
 Open .h files in C mode
 #+BEGIN_SRC emacs-lisp
@@ -707,6 +733,11 @@ Add easy shortcuts for replacing normally and with regular expressions
 #+BEGIN_SRC emacs-lisp
 (define-key org-noter-doc-mode-map (kbd "i") 'org-noter-insert-note)
 #+END_SRC
+** IMenu List
+#+begin_src emacs-lisp
+(setq imenu-list-focus-after-activation t)
+(map! :leader (:prefix ("c") :desc "imenu list" "l" 'imenu-list-smart-toggle))
+#+end_src
 
 ** Org super agenda
 #+BEGIN_SRC emacs-lisp
