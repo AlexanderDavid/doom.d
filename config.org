@@ -281,7 +281,7 @@ Activate the org-habit module
 (after! org-roam
   (setq org-roam-directory "~/doc/org/notes")
   (setq org-roam-index-file "~/doc/org/notes/index.org")
-  ;; (add-hook 'after-init-hook 'org-roam-mode)
+  (add-hook 'after-init-hook 'org-roam-mode)
   (setq org-roam-graph-viewer "/usr/bin/firefox")
   (setq org-roam-ref-capture-templates
         '(("r" "ref" plain (function org-roam-capture--get-point)
@@ -306,23 +306,23 @@ Make citation links red in the graph
 (setq bibtex-completion-library-path '("~/doc/org/notes/papers"))
 
 (use-package org-roam-bibtex
-  :after (org-roam)
-  :hook (org-roam-mode . org-roam-bibtex-mode)
-  :config
-  (setq org-roam-bibtex-preformat-keywords
-        '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
-  (setq orb-templates
-        '(("r" "ref" plain (function org-roam-capture--get-point)
-           ""
-           :file-name "${slug}"
-           :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}
+  :after (org-roam helm org-mode)
+  :hook (org-roam-mode . org-roam-bibtex-mode))
+;;   :config
+;;   (setq org-roam-bibtex-preformat-keywords
+;;         '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
+;;   (setq orb-templates
+;;         '(("r" "ref" plain (function org-roam-capture--get-point)
+;;            ""
+;;            :file-name "${slug}"
+;;            :head "#+TITLE: ${title}\n#+ROAM_KEY: ${ref}
 
-- tags ::
-- keywords :: ${keywords}
-\n* [[%(orb-process-file-field \"${=key=}\")][${title}]]\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
+;; - tags ::
+;; - keywords :: ${keywords}
+;; \n* [[%(orb-process-file-field \"${=key=}\")][${title}]]\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
 
-           :unnarrowed t
-           :immediate-finish t))))
+;;            :unnarrowed t
+;;            :immediate-finish t))))
 #+END_SRC
 ** Org Noter
 #+BEGIN_SRC emacs-lisp
@@ -608,7 +608,7 @@ Set the notes as the default helm bibtex action
 (require 'org-download)
 (setq-default org-download-image-dir "~/doc/org/notes/images")
 (setq-default org-download-heading-lvl nil)
-(setq org-download-screenshot-method "maim -s -d 0.1 %s")
+(setq org-download-screenshot-method "export XAUTHORITY=/home/alex/.Xauthority && maim -s -d 0.1 %s")
 #+END_SRC
 * Languages
 ** LaTeX
